@@ -567,3 +567,10 @@
 .aristilia.chat-card .outcome-critSuccess { background: rgba(60, 130, 40, 0.5); color: #234012; }
 .aristilia.chat-card .outcome-fail { background: rgba(150, 60, 50, 0.3); color: #6e2018; }
 .aristilia.chat-card .outcome-critFail { background: rgba(150, 40, 32, 0.5); color: #5a1710; }
+
+/* Tarjeta de tesoro (macros de botín) */
+.aristilia.chat-card.treasure-card .tr-row { margin: 5px 0; font-size: 0.86em; }
+.aristilia.chat-card.treasure-card .tr-row > i { color: #7a2d22; margin-right: 4px; }
+.aristilia.chat-card.treasure-card .muted { color: #6b5638; font-size: 0.9em; }
+.aristilia.chat-card.treasure-card .tr-magic { margin: 3px 0 0; padding-left: 20px; }
+.aristilia.chat-card.treasure-card .tr-magic li { margin: 1px 0; }

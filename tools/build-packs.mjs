@@ -14,9 +14,10 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { WEAPONS, ARMOR, SPELLS, RACES, CLASSES } from './packs-data.mjs';
 import { flattenProficiencies } from '../module/data/proficiencies.mjs';
+import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.12.0';
+const SYSTEM_VERSION = '0.13.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -91,6 +92,32 @@ function makeActor({ seed, name, img, folder, system }) {
     items: [],
     effects: [],
     folder: folder ?? null,
+    sort: 0,
+    ownership: { default: 0 },
+    flags: {},
+    _stats: {
+      systemId: 'aristilia',
+      systemVersion: SYSTEM_VERSION,
+      coreVersion: '14',
+      createdTime: 0,
+      modifiedTime: 0,
+      lastModifiedBy: null
+    }
+  };
+}
+
+function makeMacro({ seed, name, img, command }) {
+  const _id = makeId(seed);
+  return {
+    _id,
+    _key: `!macros!${_id}`,
+    name,
+    type: 'script',
+    img,
+    scope: 'global',
+    command,
+    author: null,
+    folder: null,
     sort: 0,
     ownership: { default: 0 },
     flags: {},
@@ -377,6 +404,18 @@ function buildSpells() {
   }));
 }
 
+function buildTreasure() {
+  // Los datos B/X se inyectan como prefijo en el command de cada macro, así son
+  // autocontenidas (solo dependen de APIs estables de Foundry: Roll/ChatMessage/DialogV2).
+  const prelude = `const TREASURE = ${JSON.stringify(TREASURE)};\n`;
+  const hoard = readFileSync(join(root, 'tools', 'macros', 'treasure-hoard.js'), 'utf8');
+  const subtable = readFileSync(join(root, 'tools', 'macros', 'treasure-subtable.js'), 'utf8');
+  return [
+    makeMacro({ seed: 'treasure:hoard', name: 'Generar botín de tesoro', img: 'icons/svg/coins.svg', command: prelude + hoard }),
+    makeMacro({ seed: 'treasure:subtable', name: 'Tirar subtabla de tesoro', img: 'icons/svg/d20-grey.svg', command: prelude + subtable })
+  ];
+}
+
 /* -------------------------------------------- */
 /*  Escritura LevelDB                            */
 /* -------------------------------------------- */
@@ -405,6 +444,7 @@ const spells = buildSpells();
 const races = buildRaces();
 const classes = buildClasses();
 const monsters = buildMonsters();
+const treasure = buildTreasure();
 
 await writePack('gear', gear);
 await writePack('proficiencies', profs);
@@ -412,6 +452,7 @@ await writePack('spells', spells);
 await writePack('races', races);
 await writePack('classes', classes);
 await writePack('monsters', monsters);
+await writePack('treasure', treasure);
 
-const total = gear.length + profs.length + spells.length + races.length + classes.length + monsters.length;
-console.log(`\nTotal: ${total} documentos compilados en 6 compendios.`);
+const total = gear.length + profs.length + spells.length + races.length + classes.length + monsters.length + treasure.length;
+console.log(`\nTotal: ${total} documentos compilados en 7 compendios.`);
