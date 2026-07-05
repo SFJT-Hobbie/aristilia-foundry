@@ -9,12 +9,23 @@ import { formatMod } from './modifiers.mjs';
 
 const M = ARISTILIA.mechanics;
 
-async function renderChat(actor, template, data) {
+/**
+ * Crea el mensaje de chat de una tirada.
+ * `rolls` se adjunta al mensaje para que Dice So Nice (si está instalado) muestre
+ * los dados 3D. Sin DSN, la tarjeta se ve igual (el total ya va en el contenido),
+ * así que el fallback es automático y no requiere ramificar el código.
+ */
+async function renderChat(actor, template, data, rolls = []) {
   const content = await foundry.applications.handlebars.renderTemplate(template, data);
-  return ChatMessage.create({
+  const messageData = {
     speaker: ChatMessage.getSpeaker({ actor }),
-    content
-  });
+    content,
+    rolls
+  };
+  // Respeta el modo de tirada actual (pública / privada del GM / secreta / a ciegas).
+  const rollMode = game.settings.get('core', 'rollMode');
+  ChatMessage.applyRollMode(messageData, rollMode);
+  return ChatMessage.create(messageData);
 }
 
 /**
@@ -51,7 +62,7 @@ export async function rollTarget20({ actor, label, mod = 0, bonusToHit = 0, targ
     outcomeLabel: game.i18n.localize(`ARISTILIA.Outcome.${outcome}`),
     tooltip: await roll.getTooltip()
   };
-  await renderChat(actor, 'systems/aristilia/templates/chat/target20-card.hbs', data);
+  await renderChat(actor, 'systems/aristilia/templates/chat/target20-card.hbs', data, [roll]);
   return roll;
 }
 
@@ -76,7 +87,7 @@ export async function rollSkillD100({ actor, label, skill = 0 } = {}) {
     outcomeLabel: game.i18n.localize(`ARISTILIA.Outcome.${outcome}`),
     tooltip: await roll.getTooltip()
   };
-  await renderChat(actor, 'systems/aristilia/templates/chat/skill-card.hbs', data);
+  await renderChat(actor, 'systems/aristilia/templates/chat/skill-card.hbs', data, [roll]);
   return roll;
 }
 
@@ -109,7 +120,7 @@ export async function rollWeaponAttack({ actor, item, targetAC = 0, situational 
       formula: dmgRoll.formula,
       total: dmgRoll.total,
       tooltip: await dmgRoll.getTooltip()
-    });
+    }, [dmgRoll]);
   }
   return attackRoll;
 }
