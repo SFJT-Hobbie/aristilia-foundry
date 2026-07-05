@@ -328,6 +328,14 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       el.classList.toggle('active', el.dataset.tab === this._activeTab));
     root.querySelectorAll('.sheet-tabs .tab-link').forEach((el) =>
       el.classList.toggle('active', el.dataset.tab === this._activeTab));
+
+    // Un <prose-mirror> montado dentro de una pestaña oculta (display:none) no llega a
+    // inicializar su editor. Al hacerse visible, si sigue sin editor interno, lo re-conectamos
+    // (clonar + reemplazar re-dispara connectedCallback ahora que es visible).
+    const active = root.querySelector(`.tab-content[data-tab="${this._activeTab}"]`);
+    active?.querySelectorAll('prose-mirror').forEach((pm) => {
+      if (!pm.querySelector('.ProseMirror')) pm.replaceWith(pm.cloneNode(true));
+    });
   }
 }
 

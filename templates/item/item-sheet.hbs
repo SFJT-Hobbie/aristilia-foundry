@@ -109,7 +109,11 @@
 
   <section class="item-description">
     <h3>{{localize 'ARISTILIA.Description'}}</h3>
-    {{editor enrichedDescription target="system.description" engine="prosemirror" button=true editable=editable}}
+    {{#if editable}}
+      <prose-mirror name="system.description" value="{{system.description}}" document-uuid="{{item.uuid}}"></prose-mirror>
+    {{else}}
+      <div class="editor-readonly">{{{enrichedDescription}}}</div>
+    {{/if}}
   </section>
 
 </div>
