@@ -359,7 +359,9 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 export class AristiliaCharacterSheet extends BaseActorSheet {
   static PARTS = {
-    body: { template: 'systems/aristilia/templates/actor/character-sheet.hbs' }
+    // scrollable: [''] preserva la posición de scroll del elemento raíz de la parte
+    // entre re-renders (p. ej. al colocar un item en la rejilla).
+    body: { template: 'systems/aristilia/templates/actor/character-sheet.hbs', scrollable: [''] }
   };
 }
 
@@ -369,7 +371,7 @@ export class AristiliaCharacterSheet extends BaseActorSheet {
 
 export class AristiliaNpcSheet extends BaseActorSheet {
   static PARTS = {
-    body: { template: 'systems/aristilia/templates/actor/npc-sheet.hbs' }
+    body: { template: 'systems/aristilia/templates/actor/npc-sheet.hbs', scrollable: [''] }
   };
 }
 
