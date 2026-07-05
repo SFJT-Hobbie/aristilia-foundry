@@ -1,0 +1,13 @@
+{
+  "name": "aristilia-foundry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node tools/validate.mjs",
+    "build:packs": "node tools/build-packs.mjs"
+  },
+  "devDependencies": {
+    "classic-level": "^1.4.1"
+  }
+}

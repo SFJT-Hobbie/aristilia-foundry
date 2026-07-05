@@ -1,0 +1,16 @@
+<section class="attributes-block">
+  <h3>{{localize 'ARISTILIA.Attributes'}}</h3>
+  <div class="attributes-grid">
+    {{#each config.attributes as |label key|}}
+      {{#with (lookup ../system.attributes key) as |attr|}}
+        <div class="attribute" data-attribute="{{key}}">
+          <a class="attribute-name" data-action="rollAttribute" data-attr="{{key}}" title="{{localize 'ARISTILIA.Roll.target20'}}">
+            {{localize label}}
+          </a>
+          <input class="attribute-value" type="number" name="system.attributes.{{key}}.value" value="{{attr.value}}" />
+          <span class="attribute-mod">{{formatMod attr.mod}}</span>
+        </div>
+      {{/with}}
+    {{/each}}
+  </div>
+</section>

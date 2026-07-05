@@ -1,0 +1,39 @@
+<section class="inventory-block">
+  <h3>
+    {{localize 'ARISTILIA.Inventory'}}
+    <small>({{grid.cols}} × {{grid.rows}})</small>
+    <a class="item-create" data-action="createItem" data-type="gear" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+  </h3>
+  <p class="hint">{{localize 'ARISTILIA.Inventory.hint'}}</p>
+
+  <div class="inventory-grid"
+       style="grid-template-columns: repeat({{grid.cols}}, 40px); grid-auto-rows: 40px;">
+    {{#each (aristiliaRange grid.cells) as |cell|}}
+      <div class="grid-cell"></div>
+    {{/each}}
+
+    {{#each grid.placed as |it|}}
+      <div class="grid-item inv-draggable" draggable="true" data-item-id="{{it.id}}"
+           title="{{it.name}} — {{localize 'ARISTILIA.Inventory.unplaceHint'}}"
+           style="grid-column: {{add it.x 1}} / span {{it.w}}; grid-row: {{add it.y 1}} / span {{it.h}};">
+        <img src="{{it.img}}" alt="{{it.name}}" />
+      </div>
+    {{/each}}
+  </div>
+
+  <h4 class="backpack-title">{{localize 'ARISTILIA.Inventory.backpack'}}</h4>
+  <ol class="items-list inventory-list">
+    {{#each grid.backpack as |item|}}
+      <li class="item inv-draggable" data-item-id="{{item.id}}" draggable="true">
+        <img class="item-icon" src="{{item.img}}" alt="{{item.name}}" />
+        <span class="item-name">{{item.name}}</span>
+        <span class="item-detail">{{item.system.size.w}}×{{item.system.size.h}}
+          {{#if item.system.quantity}}· x{{item.system.quantity}}{{/if}}</span>
+        <span class="item-controls">
+          <a data-action="editItem" data-item-id="{{item.id}}"><i class="fas fa-edit"></i></a>
+          <a data-action="deleteItem" data-item-id="{{item.id}}"><i class="fas fa-trash"></i></a>
+        </span>
+      </li>
+    {{/each}}
+  </ol>
+</section>

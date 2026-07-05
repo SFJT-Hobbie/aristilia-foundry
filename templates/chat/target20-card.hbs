@@ -1,0 +1,17 @@
+<div class="aristilia chat-card target20 {{outcome}}">
+  <header class="card-header">
+    <h3>{{label}}</h3>
+    {{#if flavor}}<span class="flavor">{{flavor}}</span>{{/if}}
+  </header>
+  <div class="card-roll">
+    <div class="dice-formula">{{formula}}</div>
+    <div class="dice-total">{{total}} <span class="vs">≥ {{target}}</span></div>
+  </div>
+  <div class="card-detail">
+    {{#if modText}}<span>Mod: {{modText}}</span>{{/if}}
+    {{#if bonusToHit}}<span>Bono golpe: +{{bonusToHit}}</span>{{/if}}
+    {{#if targetAC}}<span>CA enemigo: {{targetAC}}</span>{{/if}}
+    <span class="natural">d20: {{die}}</span>
+  </div>
+  <div class="card-outcome outcome-{{outcome}}">{{outcomeLabel}}</div>
+</div>

@@ -1,0 +1,88 @@
+{
+  "id": "aristilia",
+  "title": "Aristilia",
+  "description": "Sistema OSR de mesa Aristilia para Foundry VTT. Resolución Target20 y competencias d100%, atributos con tabla de modificadores propia, tres clases (Guerrero, Usuario de Magia, Especialista), seis razas y tres escuelas de magia. Adaptado de la web-app de reglas de Aristilia.",
+  "version": "0.3.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14",
+    "maximum": "14"
+  },
+  "authors": [
+    {
+      "name": "SFJT-Hobbie",
+      "url": "https://github.com/SFJT-Hobbie/ttrpg-website-v2"
+    }
+  ],
+  "esmodules": ["aristilia.mjs"],
+  "styles": ["styles/aristilia.css"],
+  "languages": [
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es-ES.json"
+    }
+  ],
+  "documentTypes": {
+    "Actor": {
+      "character": {},
+      "npc": {}
+    },
+    "Item": {
+      "weapon": {},
+      "armor": {},
+      "shield": {},
+      "gear": {},
+      "spell": {},
+      "proficiency": {},
+      "class": {},
+      "race": {}
+    }
+  },
+  "packs": [
+    {
+      "name": "spells",
+      "label": "Hechizos (Aristilia)",
+      "path": "packs/spells",
+      "type": "Item",
+      "system": "aristilia"
+    },
+    {
+      "name": "gear",
+      "label": "Equipo (Aristilia)",
+      "path": "packs/gear",
+      "type": "Item",
+      "system": "aristilia"
+    },
+    {
+      "name": "proficiencies",
+      "label": "Competencias (Aristilia)",
+      "path": "packs/proficiencies",
+      "type": "Item",
+      "system": "aristilia"
+    },
+    {
+      "name": "races",
+      "label": "Razas (Aristilia)",
+      "path": "packs/races",
+      "type": "Item",
+      "system": "aristilia"
+    },
+    {
+      "name": "classes",
+      "label": "Clases (Aristilia)",
+      "path": "packs/classes",
+      "type": "Item",
+      "system": "aristilia"
+    }
+  ],
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  },
+  "primaryTokenAttribute": "hp",
+  "initiative": "1d6",
+  "url": "https://github.com/SFJT-Hobbie/aristilia-foundry",
+  "manifest": "https://github.com/SFJT-Hobbie/aristilia-foundry/releases/latest/download/system.json",
+  "download": "https://github.com/SFJT-Hobbie/aristilia-foundry/releases/latest/download/aristilia.zip"
+}

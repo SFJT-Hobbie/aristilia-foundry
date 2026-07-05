@@ -1,0 +1,115 @@
+<div class="aristilia-sheet item {{item.type}}">
+
+  <header class="sheet-header">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" data-action="editImage" alt="{{item.name}}" />
+    <input type="text" name="name" value="{{item.name}}" placeholder="{{localize 'ARISTILIA.Name'}}" class="itemname" />
+  </header>
+
+  <section class="item-fields">
+
+    {{#if (eq item.type 'weapon')}}
+      <label>{{localize 'ARISTILIA.Weapon.proficiency'}}
+        <select name="system.proficiency">
+          {{#each config.weaponProficiencies as |w|}}
+            <option value="{{w}}" {{#if (eq w ../system.proficiency)}}selected{{/if}}>{{w}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>{{localize 'ARISTILIA.Weapon.damage'}} <input type="text" name="system.damage" value="{{system.damage}}" /></label>
+      <label>{{localize 'ARISTILIA.Weapon.attackBonus'}} <input type="number" name="system.attackBonus" value="{{system.attackBonus}}" /></label>
+      <label class="checkbox">{{localize 'ARISTILIA.Weapon.ranged'}}
+        <input type="checkbox" name="system.ranged" {{#if system.ranged}}checked{{/if}} /></label>
+      <label>{{localize 'ARISTILIA.Weapon.range'}} <input type="text" name="system.range" value="{{system.range}}" /></label>
+      <label>{{localize 'ARISTILIA.Weapon.condition'}} <input type="text" name="system.condition" value="{{system.condition}}" /></label>
+    {{/if}}
+
+    {{#if (eq item.type 'armor')}}
+      <label>{{localize 'ARISTILIA.AC'}} <input type="number" name="system.ac" value="{{system.ac}}" /></label>
+    {{/if}}
+
+    {{#if (eq item.type 'shield')}}
+      <label>{{localize 'ARISTILIA.AC'}} <input type="number" name="system.ac" value="{{system.ac}}" /></label>
+    {{/if}}
+
+    {{#if (eq item.type 'gear')}}
+      <label>{{localize 'ARISTILIA.GearCategory.label'}}
+        <select name="system.category">
+          {{#each config.gearCategories as |label key|}}
+            <option value="{{key}}" {{#if (eq key ../system.category)}}selected{{/if}}>{{localize label}}</option>
+          {{/each}}
+        </select>
+      </label>
+    {{/if}}
+
+    {{#if (eq item.type 'spell')}}
+      <label>{{localize 'ARISTILIA.Spell.school'}}
+        <select name="system.school">
+          {{#each config.spellSchools as |label key|}}
+            <option value="{{key}}" {{#if (eq key ../system.school)}}selected{{/if}}>{{localize label}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>{{localize 'ARISTILIA.Spell.level'}} <input type="number" name="system.level" value="{{system.level}}" /></label>
+      <label>{{localize 'ARISTILIA.Spell.cost'}} <input type="text" name="system.cost" value="{{system.cost}}" /></label>
+      <label>{{localize 'ARISTILIA.Spell.castingTime'}} <input type="text" name="system.castingTime" value="{{system.castingTime}}" /></label>
+      <label>{{localize 'ARISTILIA.Spell.range'}} <input type="text" name="system.range" value="{{system.range}}" /></label>
+      <label>{{localize 'ARISTILIA.Spell.duration'}} <input type="text" name="system.duration" value="{{system.duration}}" /></label>
+    {{/if}}
+
+    {{#if (eq item.type 'proficiency')}}
+      <label>{{localize 'ARISTILIA.Prof.kind'}}
+        <select name="system.kind">
+          {{#each config.proficiencyKinds as |label key|}}
+            <option value="{{key}}" {{#if (eq key ../system.kind)}}selected{{/if}}>{{localize label}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>{{localize 'ARISTILIA.Prof.attribute'}}
+        <select name="system.attribute">
+          {{#each config.attributes as |label key|}}
+            <option value="{{key}}" {{#if (eq key ../system.attribute)}}selected{{/if}}>{{localize label}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>{{localize 'ARISTILIA.Prof.category'}} <input type="text" name="system.category" value="{{system.category}}" /></label>
+      <label>{{localize 'ARISTILIA.Prof.slots'}} <input type="number" name="system.slots" value="{{system.slots}}" /></label>
+      <label>{{localize 'ARISTILIA.Prof.difficulty'}} <input type="text" name="system.difficulty" value="{{system.difficulty}}" /></label>
+      <label>{{localize 'ARISTILIA.Prof.skill'}} <input type="number" name="system.skill" value="{{system.skill}}" /> %</label>
+    {{/if}}
+
+    {{#if (eq item.type 'class')}}
+      <label>{{localize 'ARISTILIA.Class.hitDie'}} <input type="text" name="system.hitDie" value="{{system.hitDie}}" /></label>
+      <label>{{localize 'ARISTILIA.Class.weaponSlots'}} <input type="number" name="system.weaponSlots" value="{{system.weaponSlots}}" /></label>
+      <label>{{localize 'ARISTILIA.Class.nonWeaponSlots'}} <input type="number" name="system.nonWeaponSlots" value="{{system.nonWeaponSlots}}" /></label>
+      <label>{{localize 'ARISTILIA.Class.baseSave'}} <input type="number" name="system.baseSave" value="{{system.baseSave}}" /></label>
+      <label>{{localize 'ARISTILIA.Class.saveVs'}} <input type="text" name="system.saveVs" value="{{system.saveVs}}" /></label>
+      <label>{{localize 'ARISTILIA.Class.hitBonus'}} <input type="text" name="system.hitBonus" value="{{system.hitBonus}}" /></label>
+    {{/if}}
+
+    {{#if (eq item.type 'race')}}
+      <label>{{localize 'ARISTILIA.Race.abilityMods'}} <input type="text" name="system.abilityMods" value="{{system.abilityMods}}" /></label>
+      <label>{{localize 'ARISTILIA.Race.hpBonus'}} <input type="number" name="system.hpBonus" value="{{system.hpBonus}}" /></label>
+      <label>{{localize 'ARISTILIA.Race.saveBonus'}} <input type="number" name="system.saveBonus" value="{{system.saveBonus}}" /></label>
+      <label>{{localize 'ARISTILIA.Race.saveVs'}} <input type="text" name="system.saveVs" value="{{system.saveVs}}" /></label>
+      <label>{{localize 'ARISTILIA.Race.languages'}} <input type="text" name="system.languages" value="{{system.languages}}" /></label>
+      <label>{{localize 'ARISTILIA.Race.profSlots'}} <input type="text" name="system.profSlots" value="{{system.profSlots}}" /></label>
+    {{/if}}
+
+    {{#unless (eq item.type 'class')}}{{#unless (eq item.type 'race')}}{{#unless (eq item.type 'proficiency')}}{{#unless (eq item.type 'spell')}}
+      <div class="grid-fields">
+        <label>{{localize 'ARISTILIA.Item.width'}} <input type="number" name="system.size.w" value="{{system.size.w}}" min="1" /></label>
+        <label>{{localize 'ARISTILIA.Item.height'}} <input type="number" name="system.size.h" value="{{system.size.h}}" min="1" /></label>
+        <label>{{localize 'ARISTILIA.Item.quantity'}} <input type="number" name="system.quantity" value="{{system.quantity}}" min="0" /></label>
+        <label>{{localize 'ARISTILIA.Item.weight'}} <input type="number" name="system.weight" value="{{system.weight}}" /></label>
+        <label>{{localize 'ARISTILIA.Item.price'}} <input type="number" name="system.price" value="{{system.price}}" /> sp</label>
+      </div>
+    {{/unless}}{{/unless}}{{/unless}}{{/unless}}
+
+  </section>
+
+  <section class="item-description">
+    <h3>{{localize 'ARISTILIA.Description'}}</h3>
+    <prose-mirror name="system.description" value="{{system.description}}" {{#unless editable}}disabled{{/unless}}>{{{enrichedDescription}}}</prose-mirror>
+  </section>
+
+</div>

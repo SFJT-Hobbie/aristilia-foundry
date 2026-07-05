@@ -1,0 +1,29 @@
+<section class="proficiencies-block">
+  <h3>
+    {{localize 'ARISTILIA.Proficiencies'}}
+    <small>{{localize 'ARISTILIA.ProfSlots'}}: {{formatMod system.proficiencySlots.bonus}}</small>
+    <a class="item-create" data-action="createItem" data-type="proficiency" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+  </h3>
+
+  <ol class="items-list proficiency-list">
+    {{#each items.proficiencies as |item|}}
+      <li class="item" data-item-id="{{item.id}}">
+        <span class="item-name">{{item.name}}</span>
+        <span class="item-detail">
+          {{#if (eq item.system.kind 'nonWeapon')}}
+            {{localize (lookup ../config.attributes item.system.attribute)}} · {{item.system.skill}}%
+          {{else}}
+            {{localize 'ARISTILIA.ProfKind.weapon'}}
+          {{/if}}
+        </span>
+        <span class="item-controls">
+          {{#if (eq item.system.kind 'nonWeapon')}}
+            <a data-action="rollSkill" data-item-id="{{item.id}}" title="{{localize 'ARISTILIA.Roll.skill'}}"><i class="fas fa-dice"></i></a>
+          {{/if}}
+          <a data-action="editItem" data-item-id="{{item.id}}"><i class="fas fa-edit"></i></a>
+          <a data-action="deleteItem" data-item-id="{{item.id}}"><i class="fas fa-trash"></i></a>
+        </span>
+      </li>
+    {{/each}}
+  </ol>
+</section>

@@ -1,0 +1,152 @@
+<div class="aristilia-sheet character">
+
+  <header class="sheet-header">
+    <img class="profile-img" src="{{actor.img}}" data-edit="img" data-action="editImage" alt="{{actor.name}}" />
+    <div class="header-fields">
+      <input type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'ARISTILIA.Name'}}" class="charname" />
+      <div class="header-row">
+        <label>{{localize 'ARISTILIA.Details.race'}}
+          <select name="system.details.race">
+            {{#each config.races as |label key|}}
+              <option value="{{key}}" {{#if (eq key ../system.details.race)}}selected{{/if}}>{{localize label}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label>{{localize 'ARISTILIA.Details.class'}}
+          <select name="system.details.class">
+            {{#each config.classes as |label key|}}
+              <option value="{{key}}" {{#if (eq key ../system.details.class)}}selected{{/if}}>{{localize label}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label>{{localize 'ARISTILIA.Details.alignment'}}
+          <select name="system.details.alignment">
+            {{#each config.alignments as |label key|}}
+              <option value="{{key}}" {{#if (eq key ../system.details.alignment)}}selected{{/if}}>{{localize label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      </div>
+      <div class="header-row">
+        <label>{{localize 'ARISTILIA.Details.level'}} <input type="number" name="system.details.level" value="{{system.details.level}}" /></label>
+        <label>{{localize 'ARISTILIA.Details.xp'}} <input type="number" name="system.details.xp" value="{{system.details.xp}}" /></label>
+        <label class="derived">{{localize 'ARISTILIA.Details.xpBonus'}} <b>{{system.details.xpBonus}}%</b></label>
+        <label>{{localize 'ARISTILIA.Details.rollMethod'}}
+          <select name="system.details.rollMethod">
+            {{#each config.rollMethods as |label key|}}
+              <option value="{{key}}" {{#if (eq key ../system.details.rollMethod)}}selected{{/if}}>{{localize label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  {{> "systems/aristilia/templates/actor/parts/attributes.hbs"}}
+
+  <section class="combat-block">
+    <div class="stat">
+      <label>{{localize 'ARISTILIA.HP'}}</label>
+      <input type="number" name="system.hp.value" value="{{system.hp.value}}" /> /
+      <input type="number" name="system.hp.max" value="{{system.hp.max}}" />
+    </div>
+    <div class="stat">
+      <label>{{localize 'ARISTILIA.AC'}}</label>
+      <span class="ac-total" title="{{localize 'ARISTILIA.ACTotal'}}">{{system.ac.value}}</span>
+      {{#if system.ac.equippedArmor}}
+        <small class="ac-equipped">{{system.ac.equippedArmor}}{{#if system.ac.equippedShield}} + {{system.ac.equippedShield}}{{/if}}</small>
+      {{else}}
+        <small>({{localize 'ARISTILIA.ACArmor'}} <input type="number" name="system.ac.armor" value="{{system.ac.armor}}" />
+         + {{localize 'ARISTILIA.ACShield'}} <input type="number" name="system.ac.shield" value="{{system.ac.shield}}" />)</small>
+      {{/if}}
+    </div>
+    <div class="stat">
+      <label>{{localize 'ARISTILIA.BonusToHit'}}</label>
+      <input type="number" name="system.combat.bonusToHit" value="{{system.combat.bonusToHit}}" />
+    </div>
+    <div class="stat">
+      <label>{{localize 'ARISTILIA.BonusToSave'}}</label>
+      <input type="number" name="system.combat.bonusToSave" value="{{system.combat.bonusToSave}}" />
+    </div>
+    <div class="stat">
+      <label>{{localize 'ARISTILIA.MoveClose'}}</label> <b>{{system.movement.close}} ft</b>
+    </div>
+    <div class="stat">
+      <label>{{localize 'ARISTILIA.MoveOpen'}}</label> <b>{{system.movement.open}} ft</b>
+    </div>
+    <div class="stat">
+      <label>{{localize 'ARISTILIA.MagicResistance'}}</label> <b>{{system.magicResistance}}%</b>
+    </div>
+  </section>
+
+  <section class="weapons-block">
+    <h3>{{localize 'ARISTILIA.Weapons'}}
+      <a class="item-create" data-action="createItem" data-type="weapon" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+    </h3>
+    <ol class="items-list">
+      {{#each items.weapons as |item|}}
+        <li class="item" data-item-id="{{item.id}}">
+          <span class="item-name">{{item.name}}</span>
+          <span class="item-detail">{{item.system.damage}}</span>
+          <span class="item-controls">
+            <a data-action="rollWeapon" data-item-id="{{item.id}}" title="{{localize 'ARISTILIA.Roll.attack'}}"><i class="fas fa-dice-d20"></i></a>
+            <a data-action="editItem" data-item-id="{{item.id}}"><i class="fas fa-edit"></i></a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}"><i class="fas fa-trash"></i></a>
+          </span>
+        </li>
+      {{/each}}
+    </ol>
+  </section>
+
+  <section class="armor-block">
+    <h3>{{localize 'ARISTILIA.Armor'}}
+      <a class="item-create" data-action="createItem" data-type="armor" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+    </h3>
+    <ol class="items-list">
+      {{#each items.armor as |item|}}
+        <li class="item {{#if item.system.slot.equipped}}equipped{{/if}}" data-item-id="{{item.id}}">
+          <span class="item-name">{{item.name}}</span>
+          <span class="item-detail">{{localize 'ARISTILIA.AC'}} {{item.system.ac}}</span>
+          <span class="item-controls">
+            <a data-action="toggleEquip" data-item-id="{{item.id}}"
+               class="{{#if item.system.slot.equipped}}on{{/if}}"
+               title="{{#if item.system.slot.equipped}}{{localize 'ARISTILIA.Unequip'}}{{else}}{{localize 'ARISTILIA.Equip'}}{{/if}}">
+              <i class="fas fa-shield-alt"></i>
+            </a>
+            <a data-action="editItem" data-item-id="{{item.id}}"><i class="fas fa-edit"></i></a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}"><i class="fas fa-trash"></i></a>
+          </span>
+        </li>
+      {{/each}}
+    </ol>
+  </section>
+
+  {{> "systems/aristilia/templates/actor/parts/inventory-grid.hbs"}}
+
+  {{> "systems/aristilia/templates/actor/parts/proficiencies.hbs"}}
+
+  <section class="spells-block">
+    <h3>{{localize 'ARISTILIA.Spells'}}
+      <a class="item-create" data-action="createItem" data-type="spell" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+    </h3>
+    <ol class="items-list">
+      {{#each items.spells as |item|}}
+        <li class="item" data-item-id="{{item.id}}">
+          <span class="item-name">{{item.name}}</span>
+          <span class="item-detail">{{localize (lookup ../config.spellSchools item.system.school)}}</span>
+          <span class="item-controls">
+            <a data-action="toChat" data-item-id="{{item.id}}"><i class="fas fa-comment"></i></a>
+            <a data-action="editItem" data-item-id="{{item.id}}"><i class="fas fa-edit"></i></a>
+            <a data-action="deleteItem" data-item-id="{{item.id}}"><i class="fas fa-trash"></i></a>
+          </span>
+        </li>
+      {{/each}}
+    </ol>
+  </section>
+
+  <section class="biography">
+    <h3>{{localize 'ARISTILIA.Biography'}}</h3>
+    <prose-mirror name="system.biography" value="{{system.biography}}" {{#unless editable}}disabled{{/unless}}>{{{enrichedBio}}}</prose-mirror>
+  </section>
+
+</div>

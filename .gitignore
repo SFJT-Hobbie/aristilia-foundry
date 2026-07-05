@@ -1,0 +1,7 @@
+node_modules/
+aristilia.zip
+# NOTA: no ignorar *.log de forma global — LevelDB guarda datos en archivos NNNNNN.log
+# Archivos de bloqueo y logs de depuración de LevelDB (se regeneran solos)
+packs/**/LOCK
+packs/**/LOG
+packs/**/LOG.old

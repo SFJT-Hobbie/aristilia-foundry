@@ -1,0 +1,42 @@
+name: Release
+
+# Publica el sistema al hacer push de una etiqueta v* (ej: v0.2.0).
+# El manifiesto de system.json apunta a releases/latest/download, así que
+# Foundry siempre instala/actualiza a la última release publicada.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar compendios (LevelDB)
+        run: npm run build:packs
+
+      - name: Validación estática
+        run: npm run validate
+
+      - name: Empaquetar sistema
+        run: zip -r aristilia.zip . -x '.git/*' 'node_modules/*' '.github/*'
+
+      - name: Crear release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            system.json
+            aristilia.zip

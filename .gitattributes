@@ -1,0 +1,13 @@
+# Los compendios LevelDB son binarios: nunca aplicar conversión de fin de línea.
+packs/** binary
+*.ldb binary
+*.sst binary
+
+# Código y datos de texto normalizados a LF.
+*.mjs text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.hbs text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
