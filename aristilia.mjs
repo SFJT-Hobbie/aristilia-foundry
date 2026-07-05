@@ -13,6 +13,19 @@ import { abilityMod, formatMod } from './module/helpers/modifiers.mjs';
 /*  Init                                        */
 /* -------------------------------------------- */
 
+// Red de seguridad de i18n: fusiona las etiquetas en español directamente en
+// game.i18n.translations, independientemente del idioma del cliente. Garantiza que
+// la interfaz aparezca traducida aunque la carga del idioma por manifiesto falle.
+Hooks.once('i18nInit', async function () {
+  try {
+    const data = await foundry.utils.fetchJsonWithTimeout('systems/aristilia/lang/es-ES.json');
+    foundry.utils.mergeObject(game.i18n.translations, data, { inplace: true });
+    console.log('Aristilia | Traducciones fusionadas');
+  } catch (err) {
+    console.warn('Aristilia | No se pudieron fusionar las traducciones', err);
+  }
+});
+
 Hooks.once('init', function () {
   console.log('Aristilia | Inicializando sistema');
 

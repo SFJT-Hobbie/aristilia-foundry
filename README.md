@@ -73,11 +73,19 @@ npm install         # una vez (instala classic-level)
 npm run build:packs
 ```
 
-## Inventario tipo grid (drag & drop)
+## Ficha de personaje
 
-En la ficha de personaje, arrastra objetos desde la **Mochila** a la cuadrícula `5×(5+FUE)` para
-colocarlos (respeta tamaño `w×h` y evita solapes). Doble clic sobre un objeto colocado lo devuelve
-a la mochila. La lógica está en [`module/sheets/actor-sheet.mjs`](module/sheets/actor-sheet.mjs).
+La ficha se organiza en **pestañas**: *Ficha* (atributos, combate, armas, armaduras e inventario),
+*Competencias*, *Hechizos* y *Biografía*. La cabecera (retrato, nombre, raza/clase/nivel) es siempre visible.
+
+- **Inventario tipo grid:** arrastra objetos de la lista *Objetos* a la cuadrícula `5×(5+FUE)`
+  (respeta tamaño `w×h` y evita solapes). Los colocados se marcan «En rejilla»; el botón ↺ (o doble
+  clic sobre la pieza en la rejilla) los quita. Al crear un objeto se abre un diálogo para dar
+  **nombre y dimensiones**.
+- **Competencias:** el botón «+» abre un **selector del catálogo** (75 competencias sin arma) agrupado
+  por categoría, con descripción; al elegir, crea la competencia con su atributo y ranuras.
+
+La lógica está en [`module/sheets/actor-sheet.mjs`](module/sheets/actor-sheet.mjs).
 
 ## Validación estática (sin Foundry)
 

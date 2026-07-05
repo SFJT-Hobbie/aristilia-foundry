@@ -9,13 +9,14 @@
  */
 import { ClassicLevel } from 'classic-level';
 import { createHash } from 'node:crypto';
+import { copyFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { WEAPONS, ARMOR, SPELLS, RACES, CLASSES } from './packs-data.mjs';
 import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.4.0';
+const SYSTEM_VERSION = '0.5.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -211,6 +212,10 @@ async function writePack(name, docs) {
   await db.close();
   console.log(`  ✓ pack "${name}": ${docs.length} documentos`);
 }
+
+// Sincroniza en.json = es-ES.json (mismas etiquetas en español para clientes en inglés).
+copyFileSync(join(root, 'lang', 'es-ES.json'), join(root, 'lang', 'en.json'));
+console.log('  ✓ lang/en.json sincronizado desde es-ES.json');
 
 const gear = buildGear();
 const profs = buildProficiencies();

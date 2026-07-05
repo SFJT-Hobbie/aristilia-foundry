@@ -102,6 +102,50 @@
 .aristilia-sheet label.derived { justify-content: center; }
 .aristilia-sheet label.derived b { color: var(--ar-gold); font-size: 1.3em; }
 
+/* ---------- Pestañas ---------- */
+.sheet-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 10px;
+  border-bottom: 2px solid var(--ar-red-dark);
+}
+.sheet-tabs .tab-link {
+  flex: 1;
+  text-align: center;
+  padding: 6px 8px;
+  font-variant: small-caps;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--ar-muted);
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  transition: color 120ms, background 120ms;
+}
+.sheet-tabs .tab-link:hover { color: var(--ar-text); background: var(--ar-panel); }
+.sheet-tabs .tab-link.active {
+  color: var(--ar-gold);
+  background: var(--ar-panel-2);
+  border-color: var(--ar-border);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3) inset;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: ar-fade 150ms ease; }
+@keyframes ar-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- Badges ---------- */
+.badge {
+  font-size: 0.7em;
+  font-variant: small-caps;
+  letter-spacing: 0.4px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: rgba(201, 168, 106, 0.18);
+  color: var(--ar-gold);
+  border: 1px solid var(--ar-border);
+}
+
 /* ---------- Títulos de sección ---------- */
 .aristilia-sheet section > h3,
 .aristilia-sheet section > h4 {

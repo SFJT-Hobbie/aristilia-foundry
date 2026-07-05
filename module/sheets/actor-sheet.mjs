@@ -4,6 +4,12 @@
  */
 
 import { ARISTILIA } from '../config.mjs';
+import { flattenProficiencies } from '../data/proficiencies.mjs';
+
+const ATTR_KEY = {
+  Strength: 'str', Dexterity: 'dex', Constitution: 'con',
+  Intelligence: 'int', Wisdom: 'wis', Charisma: 'cha'
+};
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -22,9 +28,14 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       editItem: BaseActorSheet.#onEditItem,
       deleteItem: BaseActorSheet.#onDeleteItem,
       toChat: BaseActorSheet.#onToChat,
-      toggleEquip: BaseActorSheet.#onToggleEquip
+      toggleEquip: BaseActorSheet.#onToggleEquip,
+      switchTab: BaseActorSheet.#onSwitchTab,
+      unplaceItem: BaseActorSheet.#onUnplaceItem
     }
   };
+
+  /** Pestaña activa (persistida entre renders). */
+  _activeTab = 'main';
 
   /** @override */
   async _prepareContext(options) {
@@ -34,6 +45,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     context.system = actor.system;
     context.config = ARISTILIA;
     context.editable = this.isEditable;
+    context.activeTab = this._activeTab;
 
     // Items agrupados por tipo
     const inventory = actor.items.filter((i) => ['weapon', 'armor', 'shield', 'gear'].includes(i.type));
@@ -68,7 +80,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           hPx: h * cell + (h - 1) * gap
         };
       }),
-      backpack: inventory.filter((i) => !isPlaced(i))
+      // La lista muestra TODOS los objetos, marcando cuáles están colocados en la rejilla.
+      all: inventory.map((i) => ({ item: i, placed: isPlaced(i) }))
     };
 
     // Biografía / descripción enriquecida
@@ -88,6 +101,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** @override — engancha listeners tras cada render. */
   _onRender(context, options) {
     super._onRender(context, options);
+    this.#applyTabs();
     const root = this.element;
     if (!root || !this.isEditable) return;
 
@@ -174,6 +188,11 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null });
   }
 
+  static async #onUnplaceItem(event, target) {
+    const item = this.document.items.get(target.dataset.itemId);
+    if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null });
+  }
+
   /* ---------- Acciones ---------- */
 
   static async #onRollAttribute(event, target) {
@@ -192,6 +211,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static async #onCreateItem(event, target) {
     const type = target.dataset.type;
+    if (type === 'proficiency') return BaseActorSheet.#onCreateProficiency.call(this);
     const sized = ['weapon', 'armor', 'shield', 'gear'].includes(type);
     const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
     const defName = game.i18n.format('ARISTILIA.NewItem', { type: typeLabel });
@@ -258,6 +278,78 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static async #onToggleEquip(event, target) {
     const item = this.document.items.get(target.dataset.itemId);
     if (item) await item.update({ 'system.slot.equipped': !item.system.slot?.equipped });
+  }
+
+  /** Picker de competencia sin arma desde el catálogo de Aristilia. */
+  static async #onCreateProficiency() {
+    const catalog = flattenProficiencies();
+    const byCat = {};
+    catalog.forEach((p, i) => { (byCat[p.category] ??= []).push({ ...p, i }); });
+
+    const groups = Object.entries(byCat).map(([cat, list]) => {
+      const opts = list.map((p) => {
+        const abbr = game.i18n.localize(ARISTILIA.attributeAbbr[ATTR_KEY[p.attribute]] ?? '');
+        return `<option value="${p.i}">${p.key} — ${abbr} · ${p.slots} ${p.slots === 1 ? 'ranura' : 'ranuras'}</option>`;
+      }).join('');
+      return `<optgroup label="${cat}">${opts}</optgroup>`;
+    }).join('');
+
+    const content = `
+      <div class="aristilia-create-dialog">
+        <label class="field">${game.i18n.localize('ARISTILIA.Proficiencies')}
+          <select name="idx">${groups}</select>
+        </label>
+        <p class="hint" data-prof-desc></p>
+      </div>`;
+
+    const data = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize('ARISTILIA.Prof.pick'), icon: 'fas fa-scroll' },
+      content,
+      classes: ['aristilia', 'dialog'],
+      rejectClose: false,
+      render: (event, dialog) => {
+        const sel = dialog.element.querySelector('select[name="idx"]');
+        const desc = dialog.element.querySelector('[data-prof-desc]');
+        const show = () => { desc.textContent = catalog[Number(sel.value)]?.description ?? ''; };
+        sel.addEventListener('change', show); show();
+      },
+      ok: {
+        label: game.i18n.localize('ARISTILIA.Add'),
+        callback: (ev, button) => new foundry.applications.ux.FormDataExtended(button.form).object
+      }
+    });
+    if (!data) return;
+
+    const p = catalog[Number(data.idx)];
+    if (!p) return;
+    const [created] = await this.document.createEmbeddedDocuments('Item', [{
+      name: p.key,
+      type: 'proficiency',
+      system: {
+        description: `<p>${p.description ?? ''}</p>${p.restriction ? `<p><em>${p.restriction}</em></p>` : ''}`,
+        kind: 'nonWeapon',
+        category: p.category,
+        attribute: ATTR_KEY[p.attribute] ?? 'str',
+        slots: p.slots ?? 1,
+        difficulty: p.difficulty?.successesNeeded ? `${p.difficulty.successesNeeded} éxitos` : 'Simple',
+        skill: 0
+      }
+    }]);
+    created?.sheet.render(true);
+  }
+
+  static #onSwitchTab(event, target) {
+    this._activeTab = target.dataset.tab;
+    this.#applyTabs();
+  }
+
+  #applyTabs() {
+    const root = this.element;
+    if (!root) return;
+    root.querySelectorAll('.tab-content').forEach((el) =>
+      el.classList.toggle('active', el.dataset.tab === this._activeTab));
+    root.querySelectorAll('.sheet-tabs .tab-link').forEach((el) =>
+      el.classList.toggle('active', el.dataset.tab === this._activeTab));
   }
 }
 
