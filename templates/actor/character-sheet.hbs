@@ -71,8 +71,11 @@
       <div class="stat">
         <label>{{localize 'ARISTILIA.AC'}}</label>
         <span class="ac-total" title="{{localize 'ARISTILIA.ACTotal'}}">{{system.ac.value}}</span>
-        {{#if system.ac.equippedArmor}}
-          <small class="ac-equipped">{{system.ac.equippedArmor}}{{#if system.ac.equippedShield}} + {{system.ac.equippedShield}}{{/if}}</small>
+        {{#if system.ac.equipped}}
+          <small class="ac-equipped">
+            {{#if system.ac.equippedArmor}}{{system.ac.equippedArmor}}{{/if}}
+            {{#if system.ac.equippedShield}}{{#if system.ac.equippedArmor}} + {{/if}}{{system.ac.equippedShield}}{{/if}}
+          </small>
         {{else}}
           <small>({{localize 'ARISTILIA.ACArmor'}} <input type="number" name="system.ac.armor" value="{{system.ac.armor}}" />
            + {{localize 'ARISTILIA.ACShield'}} <input type="number" name="system.ac.shield" value="{{system.ac.shield}}" />)</small>
@@ -119,14 +122,17 @@
 
     <section class="armor-block">
       <h3>{{localize 'ARISTILIA.Armor'}}
-        <a class="item-create" data-action="createItem" data-type="armor" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+        <span class="add-group">
+          <a class="item-create" data-action="createItem" data-type="armor" title="{{localize 'ARISTILIA.AddArmor'}}"><i class="fas fa-plus"></i> {{localize 'TYPES.Item.armor'}}</a>
+          <a class="item-create" data-action="createItem" data-type="shield" title="{{localize 'ARISTILIA.AddShield'}}"><i class="fas fa-plus"></i> {{localize 'TYPES.Item.shield'}}</a>
+        </span>
       </h3>
       <ol class="items-list">
         {{#each items.armor as |item|}}
           <li class="item {{#if item.system.slot.equipped}}equipped{{/if}}" data-item-id="{{item.id}}">
             <img class="item-icon" src="{{item.img}}" alt="{{item.name}}" />
             <span class="item-name">{{item.name}}</span>
-            <span class="item-detail">{{localize 'ARISTILIA.AC'}} {{item.system.ac}}</span>
+            <span class="item-detail">{{localize (aristiliaConcat 'TYPES.Item.' item.type)}} · {{localize 'ARISTILIA.AC'}} {{item.system.ac}}</span>
             <span class="item-controls">
               <a data-action="toggleEquip" data-item-id="{{item.id}}" class="{{#if item.system.slot.equipped}}on{{/if}}"
                  title="{{#if item.system.slot.equipped}}{{localize 'ARISTILIA.Unequip'}}{{else}}{{localize 'ARISTILIA.Equip'}}{{/if}}"><i class="fas fa-shield-alt"></i></a>

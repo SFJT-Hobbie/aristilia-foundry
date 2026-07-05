@@ -220,6 +220,15 @@
 .aristilia-sheet section > h3 i.fa-plus { color: var(--ar-red); }
 .aristilia-sheet .item-create { float: right; cursor: pointer; }
 .aristilia-sheet .item-create:hover i { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
+.aristilia-sheet .add-group { float: right; display: inline-flex; gap: 10px; }
+.aristilia-sheet .add-group .item-create {
+  float: none;
+  font-size: 0.6em;
+  font-variant: small-caps;
+  letter-spacing: 0.4px;
+  color: var(--ar-muted);
+}
+.aristilia-sheet .add-group .item-create:hover { color: var(--ar-gold); }
 .aristilia-sheet .hint { font-size: 0.75em; color: var(--ar-muted); font-style: italic; margin: 2px 0 6px; }
 
 /* ---------- Atributos ---------- */

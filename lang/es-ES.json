@@ -33,6 +33,8 @@
   "ARISTILIA.MagicResistance": "Resistencia a la Magia",
   "ARISTILIA.Weapons": "Armas",
   "ARISTILIA.Armor": "Armaduras y Escudos",
+  "ARISTILIA.AddArmor": "Añadir armadura",
+  "ARISTILIA.AddShield": "Añadir escudo",
   "ARISTILIA.Equip": "Equipar",
   "ARISTILIA.Unequip": "Desequipar",
   "ARISTILIA.Inventory.title": "Inventario",

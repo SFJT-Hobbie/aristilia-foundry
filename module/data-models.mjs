@@ -89,16 +89,20 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       rows: Math.max(1, m.baseInventoryRows + mods.str)
     };
 
-    // Clase de Armadura: si hay armadura/escudo equipado, se usa su valor;
-    // si no, el valor manual de la ficha (fallback).
+    // Clase de Armadura (CA descendente: menor = más difícil de golpear).
+    // Es ADITIVA: se suman los valores de CA de TODAS las armaduras y escudos
+    // equipados (armadura 8 + escudo -1 = 7). Si no hay nada equipado, se usan
+    // los campos manuales de la ficha como respaldo.
     const items = this.parent?.items ?? [];
-    const eqArmor = items.find((i) => i.type === 'armor' && i.system.slot?.equipped);
-    const eqShield = items.find((i) => i.type === 'shield' && i.system.slot?.equipped);
-    const armorAC = eqArmor ? (eqArmor.system.ac ?? 0) : (this.ac.armor || 0);
-    const shieldAC = eqShield ? (eqShield.system.ac ?? 0) : (this.ac.shield || 0);
-    this.ac.value = armorAC + shieldAC;
-    this.ac.equippedArmor = eqArmor?.name ?? null;
-    this.ac.equippedShield = eqShield?.name ?? null;
+    const equippedAC = items.filter((i) => ['armor', 'shield'].includes(i.type) && i.system.slot?.equipped);
+    if (equippedAC.length) {
+      this.ac.value = equippedAC.reduce((sum, i) => sum + (i.system.ac ?? 0), 0);
+    } else {
+      this.ac.value = (this.ac.armor || 0) + (this.ac.shield || 0);
+    }
+    this.ac.equipped = equippedAC.length > 0;
+    this.ac.equippedArmor = equippedAC.find((i) => i.type === 'armor')?.name ?? null;
+    this.ac.equippedShield = equippedAC.find((i) => i.type === 'shield')?.name ?? null;
 
     // Resistencia mágica (Sabiduría, sólo si positivo)
     this.magicResistance = Math.max(0, mods.wis) * m.xpBonusPerMod;
