@@ -45,7 +45,11 @@
         <label>{{localize 'ARISTILIA.BonusToHit'}}</label>
         <input type="number" name="system.bonusToHit" value="{{system.bonusToHit}}" />
       </div>
-      <div class="stat"><label>{{localize 'ARISTILIA.Npc.save'}}</label> <input type="number" name="system.save" value="{{system.save}}" /></div>
+      <div class="stat rollable-stat">
+        <a class="stat-roll" data-action="rollSave" title="{{localize 'ARISTILIA.Roll.save'}}"><i class="fas fa-dice-d20"></i></a>
+        <label>{{localize 'ARISTILIA.Npc.save'}}</label>
+        <input type="number" name="system.save" value="{{system.save}}" />
+      </div>
       <div class="stat"><label>{{localize 'ARISTILIA.Npc.hd'}}</label> <input type="number" name="system.hd" value="{{system.hd}}" />
         {{#if system.hitDiceText}}<small class="raw">({{system.hitDiceText}})</small>{{/if}}</div>
       <div class="stat"><label>{{localize 'ARISTILIA.Npc.morale'}}</label> <input type="number" name="system.morale" value="{{system.morale}}" /></div>
