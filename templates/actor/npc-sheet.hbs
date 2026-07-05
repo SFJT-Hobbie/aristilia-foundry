@@ -12,7 +12,15 @@
             {{/each}}
           </select>
         </label>
-        <label>{{localize 'ARISTILIA.Npc.hd'}} <input type="number" name="system.hd" value="{{system.hd}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.creatureType'}} <input type="text" name="system.creatureType" value="{{system.creatureType}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.biome'}} <input type="text" name="system.biome" value="{{system.biome}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.alignment'}}
+          <select name="system.alignment">
+            {{#each config.alignments as |label key|}}
+              <option value="{{key}}" {{#if (eq key ../system.alignment)}}selected{{/if}}>{{localize label}}</option>
+            {{/each}}
+          </select>
+        </label>
       </div>
     </div>
   </header>
@@ -32,10 +40,39 @@
         <input type="number" name="system.hp.max" value="{{system.hp.max}}" />
       </div>
       <div class="stat"><label>{{localize 'ARISTILIA.AC'}}</label> <input type="number" name="system.ac" value="{{system.ac}}" /></div>
+      <div class="stat rollable-stat">
+        <a class="stat-roll" data-action="rollHit" title="{{localize 'ARISTILIA.Roll.attack'}}"><i class="fas fa-dice-d20"></i></a>
+        <label>{{localize 'ARISTILIA.BonusToHit'}}</label>
+        <input type="number" name="system.bonusToHit" value="{{system.bonusToHit}}" />
+      </div>
       <div class="stat"><label>{{localize 'ARISTILIA.Npc.save'}}</label> <input type="number" name="system.save" value="{{system.save}}" /></div>
-      <div class="stat"><label>{{localize 'ARISTILIA.BonusToHit'}}</label> <input type="number" name="system.bonusToHit" value="{{system.bonusToHit}}" /></div>
-      <div class="stat"><label>{{localize 'ARISTILIA.MoveClose'}}</label> <input type="number" name="system.movement.close" value="{{system.movement.close}}" /></div>
-      <div class="stat"><label>{{localize 'ARISTILIA.MoveOpen'}}</label> <input type="number" name="system.movement.open" value="{{system.movement.open}}" /></div>
+      <div class="stat"><label>{{localize 'ARISTILIA.Npc.hd'}}</label> <input type="number" name="system.hd" value="{{system.hd}}" />
+        {{#if system.hitDiceText}}<small class="raw">({{system.hitDiceText}})</small>{{/if}}</div>
+      <div class="stat"><label>{{localize 'ARISTILIA.Npc.morale'}}</label> <input type="number" name="system.morale" value="{{system.morale}}" /></div>
+      <div class="stat wide"><label>{{localize 'ARISTILIA.Npc.move'}}</label> <input type="text" name="system.moveText" value="{{system.moveText}}" /></div>
+      <div class="stat"><label>{{localize 'ARISTILIA.Npc.xp'}}</label> <input type="number" name="system.xp" value="{{system.xp}}" /></div>
+    </section>
+
+    <section class="npc-block">
+      <h3>{{localize 'ARISTILIA.Npc.attacks'}}</h3>
+      <input type="text" class="full" name="system.attacks" value="{{system.attacks}}" placeholder="ej. 2 garras (2d8+3) y mordisco (1d6+3)" />
+    </section>
+
+    <section class="npc-block">
+      <h3>{{localize 'ARISTILIA.Npc.special'}}</h3>
+      <textarea class="full" name="system.special" rows="2">{{system.special}}</textarea>
+    </section>
+
+    <section class="npc-block npc-details">
+      <h3>{{localize 'ARISTILIA.Npc.ecology'}}</h3>
+      <div class="detail-grid">
+        <label>{{localize 'ARISTILIA.Npc.challengeLevel'}} <input type="text" name="system.challengeLevel" value="{{system.challengeLevel}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.numberEncountered'}} <input type="text" name="system.numberEncountered" value="{{system.numberEncountered}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.treasureType'}} <input type="text" name="system.treasureType" value="{{system.treasureType}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.treasureAdd'}} <input type="text" name="system.treasureAdd" value="{{system.treasureAdd}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.source'}} <input type="text" name="system.source" value="{{system.source}}" /></label>
+        <label>{{localize 'ARISTILIA.Npc.sourceRef'}} <input type="text" name="system.sourceRef" value="{{system.sourceRef}}" /></label>
+      </div>
     </section>
 
     <section class="weapons-block">

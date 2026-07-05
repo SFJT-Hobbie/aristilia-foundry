@@ -146,6 +146,25 @@ export class NpcData extends foundry.abstract.TypeDataModel {
         weapon: new fields.ArrayField(new fields.StringField()),
         nonWeapon: new fields.ArrayField(new fields.StringField())
       }),
+      // Campos de bestiario (aditivos): taxonomía, ecología, combate y tesoro.
+      // Los "*Text" guardan el valor crudo del bestiario (p. ej. HD "7+7",
+      // movimiento "24/24 (flying)") para no perder información al parsear.
+      creatureType: new fields.StringField({ initial: '' }),   // Bestia, Dragón, No-muerto…
+      biome: new fields.StringField({ initial: '' }),
+      alignment: new fields.StringField({ initial: 'neutral' }), // lawful | neutral | chaotic
+      hitDiceText: new fields.StringField({ initial: '' }),
+      attacks: new fields.StringField({ initial: '' }),
+      special: new fields.StringField({ initial: '' }),
+      moveText: new fields.StringField({ initial: '' }),
+      morale: new fields.NumberField({ integer: true, initial: 0, min: 0 }),
+      xp: new fields.NumberField({ integer: true, initial: 0, min: 0 }),
+      challengeLevel: new fields.StringField({ initial: '' }),
+      numberEncountered: new fields.StringField({ initial: '' }),
+      treasureType: new fields.StringField({ initial: 'Nil' }),
+      treasureAdd: new fields.StringField({ initial: '' }),
+      treasureSource: new fields.StringField({ initial: '' }),
+      source: new fields.StringField({ initial: '' }),
+      sourceRef: new fields.StringField({ initial: '' }),
       description: new fields.HTMLField({ initial: '' })
     };
   }

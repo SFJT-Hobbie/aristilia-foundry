@@ -46,7 +46,8 @@
 .aristilia-sheet select { color: var(--ar-ink); }
 .aristilia-sheet input[type="text"],
 .aristilia-sheet input[type="number"],
-.aristilia-sheet select {
+.aristilia-sheet select,
+.aristilia-sheet textarea {
   background: var(--ar-field);
   border: 1px solid var(--ar-border);
   border-radius: 4px;
@@ -54,8 +55,14 @@
   padding: 2px 5px;
   transition: border-color 120ms, box-shadow 120ms;
 }
+.aristilia-sheet textarea {
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+}
 .aristilia-sheet input:focus,
-.aristilia-sheet select:focus {
+.aristilia-sheet select:focus,
+.aristilia-sheet textarea:focus {
   outline: none;
   border-color: var(--ar-gold-bright);
   box-shadow: 0 0 6px rgba(156, 123, 58, 0.55);
@@ -459,6 +466,29 @@
 }
 .aristilia-sheet .npc-grid-size input[type="number"] { width: 52px; text-align: center; }
 .aristilia-sheet .npc-grid-size .times { color: var(--ar-ink-soft); font-weight: 700; }
+
+/* Bloques del bestiario (PNJ) */
+.aristilia-sheet .combat-block .stat.wide { grid-column: span 2; }
+.aristilia-sheet .combat-block .stat small.raw { color: var(--ar-ink-soft); font-style: italic; margin-left: 4px; }
+.aristilia-sheet .npc-block { margin-top: 4px; }
+.aristilia-sheet .npc-block input.full,
+.aristilia-sheet .npc-block textarea.full { width: 100%; }
+.aristilia-sheet .npc-block textarea.full { min-height: 42px; }
+.aristilia-sheet .npc-details .detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+}
+.aristilia-sheet .npc-details .detail-grid label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85em;
+  font-variant: small-caps;
+  color: var(--ar-ink-soft);
+}
+.aristilia-sheet .npc-details .detail-grid input { max-width: 60%; text-align: right; }
 
 /* ---------- Ficha de Item ---------- */
 .aristilia-sheet .item-fields label,
