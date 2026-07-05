@@ -136,6 +136,12 @@ export class NpcData extends foundry.abstract.TypeDataModel {
         close: new fields.NumberField({ integer: true, initial: 30 }),
         open: new fields.NumberField({ integer: true, initial: 120 })
       }),
+      // Rejilla de inventario del PNJ: a diferencia del PJ (derivada de la Fuerza),
+      // aquí el tamaño lo define el GM (o el compendio de monstruos).
+      inventory: new fields.SchemaField({
+        cols: new fields.NumberField({ integer: true, initial: 5, min: 1, max: 20 }),
+        rows: new fields.NumberField({ integer: true, initial: 5, min: 1, max: 20 })
+      }),
       proficiencies: new fields.SchemaField({
         weapon: new fields.ArrayField(new fields.StringField()),
         nonWeapon: new fields.ArrayField(new fields.StringField())

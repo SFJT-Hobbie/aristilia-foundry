@@ -17,45 +17,74 @@
     </div>
   </header>
 
-  <section class="combat-block npc-stats">
-    <div class="stat">
-      <label>{{localize 'ARISTILIA.HP'}}</label>
-      <input type="number" name="system.hp.value" value="{{system.hp.value}}" /> /
-      <input type="number" name="system.hp.max" value="{{system.hp.max}}" />
+  <nav class="sheet-tabs">
+    <a class="tab-link {{#if (eq activeTab 'main')}}active{{/if}}" data-action="switchTab" data-tab="main"><i class="fas fa-shield-halved"></i> {{localize 'ARISTILIA.Tab.main'}}</a>
+    <a class="tab-link {{#if (eq activeTab 'inventory')}}active{{/if}}" data-action="switchTab" data-tab="inventory"><i class="fas fa-box-open"></i> {{localize 'ARISTILIA.Tab.inventory'}}</a>
+    <a class="tab-link {{#if (eq activeTab 'bio')}}active{{/if}}" data-action="switchTab" data-tab="bio"><i class="fas fa-feather"></i> {{localize 'ARISTILIA.Description'}}</a>
+  </nav>
+
+  {{#if (eq activeTab 'main')}}
+  <div class="tab-content" data-tab="main">
+    <section class="combat-block npc-stats">
+      <div class="stat">
+        <label>{{localize 'ARISTILIA.HP'}}</label>
+        <input type="number" name="system.hp.value" value="{{system.hp.value}}" /> /
+        <input type="number" name="system.hp.max" value="{{system.hp.max}}" />
+      </div>
+      <div class="stat"><label>{{localize 'ARISTILIA.AC'}}</label> <input type="number" name="system.ac" value="{{system.ac}}" /></div>
+      <div class="stat"><label>{{localize 'ARISTILIA.Npc.save'}}</label> <input type="number" name="system.save" value="{{system.save}}" /></div>
+      <div class="stat"><label>{{localize 'ARISTILIA.BonusToHit'}}</label> <input type="number" name="system.bonusToHit" value="{{system.bonusToHit}}" /></div>
+      <div class="stat"><label>{{localize 'ARISTILIA.MoveClose'}}</label> <input type="number" name="system.movement.close" value="{{system.movement.close}}" /></div>
+      <div class="stat"><label>{{localize 'ARISTILIA.MoveOpen'}}</label> <input type="number" name="system.movement.open" value="{{system.movement.open}}" /></div>
+    </section>
+
+    <section class="weapons-block">
+      <h3>{{localize 'ARISTILIA.Weapons'}}
+        <a class="item-create" data-action="createItem" data-type="weapon" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+      </h3>
+      <ol class="items-list">
+        {{#each items.weapons as |item|}}
+          <li class="item" data-item-id="{{item.id}}">
+            <img class="item-icon" src="{{item.img}}" alt="{{item.name}}" />
+            <span class="item-name">{{item.name}}</span>
+            <span class="item-detail">{{item.system.damage}}</span>
+            <span class="item-controls">
+              <a data-action="rollWeapon" data-item-id="{{item.id}}" title="{{localize 'ARISTILIA.Roll.attack'}}"><i class="fas fa-dice-d20"></i></a>
+              <a data-action="editItem" data-item-id="{{item.id}}"><i class="fas fa-edit"></i></a>
+              <a data-action="deleteItem" data-item-id="{{item.id}}"><i class="fas fa-trash"></i></a>
+            </span>
+          </li>
+        {{else}}
+          <li class="empty">{{localize 'ARISTILIA.NoneYet'}}</li>
+        {{/each}}
+      </ol>
+    </section>
+  </div>
+  {{/if}}
+
+  {{#if (eq activeTab 'inventory')}}
+  <div class="tab-content" data-tab="inventory">
+    <div class="npc-grid-size">
+      <span class="label">{{localize 'ARISTILIA.Inventory.gridSize'}}</span>
+      <label>{{localize 'ARISTILIA.Inventory.cols'}} <input type="number" name="system.inventory.cols" value="{{system.inventory.cols}}" min="1" max="20" /></label>
+      <span class="times">×</span>
+      <label>{{localize 'ARISTILIA.Inventory.rows'}} <input type="number" name="system.inventory.rows" value="{{system.inventory.rows}}" min="1" max="20" /></label>
     </div>
-    <div class="stat"><label>{{localize 'ARISTILIA.AC'}}</label> <input type="number" name="system.ac" value="{{system.ac}}" /></div>
-    <div class="stat"><label>{{localize 'ARISTILIA.Npc.save'}}</label> <input type="number" name="system.save" value="{{system.save}}" /></div>
-    <div class="stat"><label>{{localize 'ARISTILIA.BonusToHit'}}</label> <input type="number" name="system.bonusToHit" value="{{system.bonusToHit}}" /></div>
-    <div class="stat"><label>{{localize 'ARISTILIA.MoveClose'}}</label> <input type="number" name="system.movement.close" value="{{system.movement.close}}" /></div>
-    <div class="stat"><label>{{localize 'ARISTILIA.MoveOpen'}}</label> <input type="number" name="system.movement.open" value="{{system.movement.open}}" /></div>
-  </section>
+    {{> "systems/aristilia/templates/actor/parts/inventory-grid.hbs"}}
+  </div>
+  {{/if}}
 
-  <section class="weapons-block">
-    <h3>{{localize 'ARISTILIA.Weapons'}}
-      <a class="item-create" data-action="createItem" data-type="weapon" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
-    </h3>
-    <ol class="items-list">
-      {{#each items.weapons as |item|}}
-        <li class="item" data-item-id="{{item.id}}">
-          <span class="item-name">{{item.name}}</span>
-          <span class="item-detail">{{item.system.damage}}</span>
-          <span class="item-controls">
-            <a data-action="rollWeapon" data-item-id="{{item.id}}" title="{{localize 'ARISTILIA.Roll.attack'}}"><i class="fas fa-dice-d20"></i></a>
-            <a data-action="editItem" data-item-id="{{item.id}}"><i class="fas fa-edit"></i></a>
-            <a data-action="deleteItem" data-item-id="{{item.id}}"><i class="fas fa-trash"></i></a>
-          </span>
-        </li>
-      {{/each}}
-    </ol>
-  </section>
-
-  <section class="biography">
-    <h3>{{localize 'ARISTILIA.Description'}}</h3>
-    {{#if editable}}
-      <prose-mirror name="system.description" value="{{system.description}}" document-uuid="{{actor.uuid}}"></prose-mirror>
-    {{else}}
-      <div class="editor-readonly">{{{enrichedBio}}}</div>
-    {{/if}}
-  </section>
+  {{#if (eq activeTab 'bio')}}
+  <div class="tab-content" data-tab="bio">
+    <section class="biography">
+      <h3>{{localize 'ARISTILIA.Description'}}</h3>
+      {{#if editable}}
+        <prose-mirror name="system.description" value="{{system.description}}" document-uuid="{{actor.uuid}}"></prose-mirror>
+      {{else}}
+        <div class="editor-readonly">{{{enrichedBio}}}</div>
+      {{/if}}
+    </section>
+  </div>
+  {{/if}}
 
 </div>

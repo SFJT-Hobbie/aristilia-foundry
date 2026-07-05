@@ -431,6 +431,35 @@
 .aristilia-sheet .inv-draggable { cursor: grab; }
 .aristilia-sheet .backpack-title { margin-top: 8px; }
 
+/* Control de tamaño de rejilla del PNJ (definido por el GM) */
+.aristilia-sheet .npc-grid-size {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 6px 0 12px;
+  padding: 8px 10px;
+  border: 1px dashed var(--ar-border);
+  border-radius: 6px;
+  background: var(--ar-panel);
+}
+.aristilia-sheet .npc-grid-size .label {
+  font-variant: small-caps;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--ar-oxblood);
+}
+.aristilia-sheet .npc-grid-size label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+  color: var(--ar-ink-soft);
+  font-variant: small-caps;
+}
+.aristilia-sheet .npc-grid-size input[type="number"] { width: 52px; text-align: center; }
+.aristilia-sheet .npc-grid-size .times { color: var(--ar-ink-soft); font-weight: 700; }
+
 /* ---------- Ficha de Item ---------- */
 .aristilia-sheet .item-fields label,
 .aristilia-sheet .item-fields .grid-fields label {
