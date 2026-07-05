@@ -44,6 +44,7 @@
 
   <nav class="sheet-tabs">
     <a class="tab-link" data-action="switchTab" data-tab="main"><i class="fas fa-shield-halved"></i> {{localize 'ARISTILIA.Tab.main'}}</a>
+    <a class="tab-link" data-action="switchTab" data-tab="inventory"><i class="fas fa-box-open"></i> {{localize 'ARISTILIA.Tab.inventory'}}</a>
     <a class="tab-link" data-action="switchTab" data-tab="skills"><i class="fas fa-scroll"></i> {{localize 'ARISTILIA.Tab.skills'}}</a>
     <a class="tab-link" data-action="switchTab" data-tab="spells"><i class="fas fa-hat-wizard"></i> {{localize 'ARISTILIA.Tab.spells'}}</a>
     <a class="tab-link" data-action="switchTab" data-tab="bio"><i class="fas fa-feather"></i> {{localize 'ARISTILIA.Tab.bio'}}</a>
@@ -120,7 +121,10 @@
         {{/each}}
       </ol>
     </section>
+  </div>
 
+  {{!-- Pestaña: Inventario --}}
+  <div class="tab-content" data-tab="inventory">
     {{> "systems/aristilia/templates/actor/parts/inventory-grid.hbs"}}
   </div>
 
@@ -158,7 +162,11 @@
   <div class="tab-content" data-tab="bio">
     <section class="biography">
       <h3>{{localize 'ARISTILIA.Biography'}}</h3>
-      <prose-mirror name="system.biography" value="{{system.biography}}" {{#unless editable}}disabled{{/unless}}>{{{enrichedBio}}}</prose-mirror>
+      {{#if editable}}
+        <prose-mirror name="system.biography" value="{{system.biography}}"></prose-mirror>
+      {{else}}
+        <div class="editor-readonly">{{{enrichedBio}}}</div>
+      {{/if}}
     </section>
   </div>
 
