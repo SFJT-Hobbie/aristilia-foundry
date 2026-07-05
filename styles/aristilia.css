@@ -26,7 +26,8 @@
 
   color: var(--ar-ink);
   font-family: "Signika", "Segoe UI", serif;
-  padding: 14px 16px;
+  line-height: 1.5;
+  padding: 20px 24px;
   height: 100%;
   overflow-y: auto;
   background:
@@ -99,11 +100,11 @@
 /* ---------- Cabecera ---------- */
 .aristilia-sheet .sheet-header {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: flex-start;
   border-bottom: 2px solid var(--ar-oxblood);
-  padding-bottom: 12px;
-  margin-bottom: 10px;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
 }
 .aristilia-sheet .profile-img {
   flex: 0 0 88px;
@@ -130,7 +131,7 @@
 }
 .aristilia-sheet .charname:focus,
 .aristilia-sheet .itemname:focus { border-bottom-color: var(--ar-gold); box-shadow: none; }
-.aristilia-sheet .header-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.aristilia-sheet .header-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
 .aristilia-sheet .header-row label {
   display: flex;
   flex-direction: column;
@@ -149,13 +150,13 @@
 .aristilia-sheet .sheet-tabs {
   display: flex;
   gap: 4px;
-  margin: 4px 0 10px;
+  margin: 6px 0 18px;
   border-bottom: 2px solid var(--ar-oxblood);
 }
 .aristilia-sheet .sheet-tabs .tab-link {
   flex: 1;
   text-align: center;
-  padding: 6px 8px;
+  padding: 9px 8px;
   font-variant: small-caps;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -182,8 +183,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 8px 0 4px;
-  padding: 4px 8px;
+  margin: 14px 0 8px;
+  padding: 8px 10px;
   border: 1px dashed var(--ar-border);
   border-radius: 6px;
   background: var(--ar-panel);
@@ -229,8 +230,8 @@
   color: var(--ar-oxblood);
   border-bottom: 2px solid var(--ar-oxblood);
   border-image: linear-gradient(90deg, var(--ar-oxblood), var(--ar-gold) 55%, transparent) 1;
-  margin: 16px 0 8px;
-  padding-bottom: 3px;
+  margin: 26px 0 12px;
+  padding-bottom: 5px;
   font-weight: 700;
   font-size: 1.15em;
 }
@@ -258,7 +259,7 @@
 .aristilia-sheet .hint { font-size: 0.75em; color: var(--ar-ink-soft); font-style: italic; margin: 2px 0 6px; }
 
 /* ---------- Atributos: sellos de cera ---------- */
-.aristilia-sheet .attributes-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 6px; }
+.aristilia-sheet .attributes-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-top: 12px; margin-bottom: 8px; }
 .aristilia-sheet .attribute {
   position: relative;
   display: flex;
@@ -316,17 +317,17 @@
 }
 
 /* ---------- Bloque de combate ---------- */
-.aristilia-sheet .combat-block { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 10px; }
+.aristilia-sheet .combat-block { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0 14px; }
 .aristilia-sheet .combat-block .stat {
   border: 1px solid var(--ar-border);
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 9px 10px;
   font-size: 0.82em;
   background: var(--ar-panel);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 .aristilia-sheet .combat-block .stat label {
   font-weight: 700;
@@ -371,11 +372,12 @@
 
 /* ---------- Listas de items ---------- */
 .aristilia-sheet .items-list { list-style: none; margin: 0; padding: 0; }
+.aristilia-sheet .items-list { display: flex; flex-direction: column; gap: 4px; }
 .aristilia-sheet .items-list .item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
+  gap: 10px;
+  padding: 8px 10px;
   border-radius: 5px;
   border: 1px solid transparent;
   transition: background 120ms, border-color 120ms;
@@ -436,17 +438,17 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin: 4px 0;
+  margin: 7px 0;
   font-size: 0.9em;
 }
 .aristilia-sheet .item-fields label.checkbox { justify-content: flex-start; }
 .aristilia-sheet .item-fields .grid-fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 4px 12px;
+  gap: 7px 14px;
   border-top: 1px solid var(--ar-border);
-  margin-top: 8px;
-  padding-top: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
 }
 
 /* ---------- Diálogo de creación (ventana aparte) ---------- */
