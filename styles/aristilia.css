@@ -1,18 +1,13 @@
 /* ===========================================================
    Aristilia — hoja de estilo (tema oscuro OSR)
+   IMPORTANTE: al declararse en system.json, Foundry v13+ mete este CSS en la
+   capa "system", que tiene prioridad sobre el núcleo. Por eso CADA selector va
+   acotado a .aristilia-sheet / .aristilia / .aristilia.chat-card: así nunca
+   puede tocar la interfaz base de Foundry (chat, editores, diarios, etc.).
    =========================================================== */
 
-/* Hace que el scroll viva en NUESTRA parte (.aristilia-sheet), no en .window-content,
-   para que Foundry pueda preservar la posición entre re-renders (PART scrollable: ['']). */
-.application.aristilia .window-content { overflow: hidden; padding: 0; }
-
-.editor-readonly {
-  border: 1px solid var(--ar-border, rgba(201, 168, 106, 0.35));
-  border-radius: 6px;
-  padding: 6px;
-  min-height: 60px;
-  background: rgba(0, 0, 0, 0.2);
-}
+/* Scroll dentro de NUESTRA parte (solo en fichas del sistema, no en diálogos). */
+.application.aristilia.sheet .window-content { overflow: hidden; padding: 0; }
 
 .aristilia-sheet {
   --ar-gold: #c9a86a;
@@ -35,12 +30,9 @@
     linear-gradient(180deg, rgba(10, 8, 7, 0.35), rgba(10, 8, 7, 0.55));
 }
 
-/* ---------- Campos genéricos ---------- */
+/* ---------- Campos ---------- */
 .aristilia-sheet input,
-.aristilia-sheet select,
-.aristilia-sheet .items-list {
-  color: var(--ar-text);
-}
+.aristilia-sheet select { color: var(--ar-text); }
 .aristilia-sheet input[type="text"],
 .aristilia-sheet input[type="number"],
 .aristilia-sheet select {
@@ -58,6 +50,21 @@
   box-shadow: 0 0 6px rgba(201, 168, 106, 0.4);
 }
 .aristilia-sheet select option { background: #1b1512; }
+.aristilia-sheet .editor-readonly {
+  border: 1px solid var(--ar-border);
+  border-radius: 6px;
+  padding: 6px;
+  min-height: 60px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.aristilia-sheet prose-mirror {
+  display: block;
+  min-height: 120px;
+  border: 1px solid var(--ar-border);
+  border-radius: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.25);
+}
 
 /* ---------- Cabecera ---------- */
 .aristilia-sheet .sheet-header {
@@ -93,13 +100,7 @@
 }
 .aristilia-sheet .charname:focus,
 .aristilia-sheet .itemname:focus { border-bottom-color: var(--ar-gold); box-shadow: none; }
-
-.aristilia-sheet .header-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
+.aristilia-sheet .header-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 .aristilia-sheet .header-row label {
   display: flex;
   flex-direction: column;
@@ -115,13 +116,13 @@
 .aristilia-sheet label.derived b { color: var(--ar-gold); font-size: 1.3em; }
 
 /* ---------- Pestañas ---------- */
-.sheet-tabs {
+.aristilia-sheet .sheet-tabs {
   display: flex;
   gap: 4px;
   margin: 4px 0 10px;
   border-bottom: 2px solid var(--ar-red-dark);
 }
-.sheet-tabs .tab-link {
+.aristilia-sheet .sheet-tabs .tab-link {
   flex: 1;
   text-align: center;
   padding: 6px 8px;
@@ -135,19 +136,19 @@
   cursor: pointer;
   transition: color 120ms, background 120ms;
 }
-.sheet-tabs .tab-link:hover { color: var(--ar-text); background: var(--ar-panel); }
-.sheet-tabs .tab-link.active {
+.aristilia-sheet .sheet-tabs .tab-link:hover { color: var(--ar-text); background: var(--ar-panel); }
+.aristilia-sheet .sheet-tabs .tab-link.active {
   color: var(--ar-gold);
   background: var(--ar-panel-2);
   border-color: var(--ar-border);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3) inset;
 }
-.tab-content { display: none; }
-.tab-content.active { display: block; animation: ar-fade 150ms ease; }
+.aristilia-sheet .tab-content { display: none; }
+.aristilia-sheet .tab-content.active { display: block; animation: ar-fade 150ms ease; }
 @keyframes ar-fade { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- Badges ---------- */
-.badge {
+.aristilia-sheet .badge {
   font-size: 0.7em;
   font-variant: small-caps;
   letter-spacing: 0.4px;
@@ -171,17 +172,13 @@
   font-weight: 600;
 }
 .aristilia-sheet section > h3 i.fa-plus { color: var(--ar-red); }
-.item-create { float: right; cursor: pointer; }
-.item-create:hover i { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
-.hint { font-size: 0.75em; color: var(--ar-muted); font-style: italic; margin: 2px 0 6px; }
+.aristilia-sheet .item-create { float: right; cursor: pointer; }
+.aristilia-sheet .item-create:hover i { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
+.aristilia-sheet .hint { font-size: 0.75em; color: var(--ar-muted); font-style: italic; margin: 2px 0 6px; }
 
 /* ---------- Atributos ---------- */
-.attributes-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-}
-.attribute {
+.aristilia-sheet .attributes-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.aristilia-sheet .attribute {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -192,22 +189,17 @@
   background: var(--ar-panel);
   transition: transform 120ms, box-shadow 120ms;
 }
-.attribute:hover { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4); }
-.attribute-name {
+.aristilia-sheet .attribute:hover { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4); }
+.aristilia-sheet .attribute-name {
   font-variant: small-caps;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--ar-text);
   cursor: pointer;
 }
-.attribute-name:hover { color: var(--ar-gold); text-shadow: 0 0 8px rgba(201, 168, 106, 0.6); }
-.attribute-value {
-  width: 52px;
-  text-align: center;
-  font-size: 1.25em;
-  font-weight: 700;
-}
-.attribute-mod {
+.aristilia-sheet .attribute-name:hover { color: var(--ar-gold); text-shadow: 0 0 8px rgba(201, 168, 106, 0.6); }
+.aristilia-sheet .attribute-value { width: 52px; text-align: center; font-size: 1.25em; font-weight: 700; }
+.aristilia-sheet .attribute-mod {
   font-weight: 700;
   color: var(--ar-gold);
   background: rgba(0, 0, 0, 0.35);
@@ -218,13 +210,8 @@
 }
 
 /* ---------- Bloque de combate ---------- */
-.combat-block {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 10px 0;
-}
-.combat-block .stat {
+.aristilia-sheet .combat-block { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+.aristilia-sheet .combat-block .stat {
   border: 1px solid var(--ar-border);
   border-radius: 6px;
   padding: 6px 8px;
@@ -235,24 +222,20 @@
   align-items: center;
   gap: 4px;
 }
-.combat-block .stat label {
+.aristilia-sheet .combat-block .stat label {
   font-weight: 700;
   font-variant: small-caps;
   letter-spacing: 0.5px;
   color: var(--ar-muted);
 }
-.combat-block .stat b { color: var(--ar-gold); }
-.combat-block .stat input[type="number"] { width: 46px; text-align: center; }
-.ac-total {
-  font-size: 1.35em;
-  font-weight: 700;
-  color: var(--ar-gold);
-}
-.ac-equipped { color: var(--ar-gold-dim); font-style: italic; }
+.aristilia-sheet .combat-block .stat b { color: var(--ar-gold); }
+.aristilia-sheet .combat-block .stat input[type="number"] { width: 46px; text-align: center; }
+.aristilia-sheet .ac-total { font-size: 1.35em; font-weight: 700; color: var(--ar-gold); }
+.aristilia-sheet .ac-equipped { color: var(--ar-gold-dim); font-style: italic; }
 
 /* ---------- Listas de items ---------- */
-.items-list { list-style: none; margin: 0; padding: 0; }
-.items-list .item {
+.aristilia-sheet .items-list { list-style: none; margin: 0; padding: 0; }
+.aristilia-sheet .items-list .item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -261,20 +244,19 @@
   border: 1px solid transparent;
   transition: background 120ms, border-color 120ms;
 }
-.items-list .item:hover { background: var(--ar-panel-2); border-color: var(--ar-border); }
-.items-list .item-name { flex: 1; font-weight: 600; }
-.items-list .item-detail { font-size: 0.78em; color: var(--ar-muted); }
-.items-list .item-controls { display: flex; gap: 8px; }
-.items-list .item-controls a { cursor: pointer; color: var(--ar-muted); }
-.items-list .item-controls a:hover { color: var(--ar-gold); }
-.items-list .item-icon { width: 26px; height: 26px; object-fit: contain; border-radius: 3px; }
-.items-list .item.equipped { background: rgba(169, 68, 56, 0.16); border-color: var(--ar-red); }
-.items-list .item-controls a.on { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
-.items-list .empty { color: var(--ar-muted); font-style: italic; padding: 4px 6px; font-size: 0.85em; }
+.aristilia-sheet .items-list .item:hover { background: var(--ar-panel-2); border-color: var(--ar-border); }
+.aristilia-sheet .items-list .item-name { flex: 1; font-weight: 600; }
+.aristilia-sheet .items-list .item-detail { font-size: 0.78em; color: var(--ar-muted); }
+.aristilia-sheet .items-list .item-controls { display: flex; gap: 8px; }
+.aristilia-sheet .items-list .item-controls a { cursor: pointer; color: var(--ar-muted); }
+.aristilia-sheet .items-list .item-controls a:hover { color: var(--ar-gold); }
+.aristilia-sheet .items-list .item-icon { width: 26px; height: 26px; object-fit: contain; border-radius: 3px; }
+.aristilia-sheet .items-list .item.equipped { background: rgba(169, 68, 56, 0.16); border-color: var(--ar-red); }
+.aristilia-sheet .items-list .item-controls a.on { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
+.aristilia-sheet .items-list .empty { color: var(--ar-muted); font-style: italic; padding: 4px 6px; font-size: 0.85em; }
 
-/* ---------- Inventario tipo grid ---------- */
-/* cell 40 + gap 2 + pad 4  =>  coincide con actor-sheet.mjs GRID */
-.inventory-grid {
+/* ---------- Inventario tipo grid (cell 40 + gap 2 + pad 4) ---------- */
+.aristilia-sheet .inventory-grid {
   position: relative;
   margin: 6px 0;
   padding: 4px;
@@ -283,20 +265,15 @@
   background: rgba(0, 0, 0, 0.25);
   box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
 }
-.grid-bg {
-  position: absolute;
-  inset: 4px;
-  display: grid;
-  gap: 2px;
-}
-.grid-cell {
+.aristilia-sheet .grid-bg { position: absolute; inset: 4px; display: grid; gap: 2px; }
+.aristilia-sheet .grid-cell {
   width: 40px;
   height: 40px;
   border-radius: 3px;
   background: rgba(201, 168, 106, 0.06);
   box-shadow: inset 0 0 0 1px rgba(201, 168, 106, 0.14);
 }
-.grid-item {
+.aristilia-sheet .grid-item {
   position: absolute;
   display: flex;
   align-items: center;
@@ -310,25 +287,15 @@
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   transition: box-shadow 120ms;
 }
-.grid-item:hover { box-shadow: 0 0 8px rgba(201, 168, 106, 0.6); }
-.grid-item:active { cursor: grabbing; }
-.grid-item img { width: 82%; height: 82%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
-.inv-draggable { cursor: grab; }
-.backpack-title { margin-top: 8px; }
-
-/* ---------- Biografía / prosemirror (acotado a nuestras fichas) ---------- */
-.aristilia-sheet prose-mirror {
-  display: block;
-  min-height: 90px;
-  border: 1px solid var(--ar-border);
-  border-radius: 6px;
-  padding: 6px;
-  background: rgba(0, 0, 0, 0.25);
-}
+.aristilia-sheet .grid-item:hover { box-shadow: 0 0 8px rgba(201, 168, 106, 0.6); }
+.aristilia-sheet .grid-item:active { cursor: grabbing; }
+.aristilia-sheet .grid-item img { width: 82%; height: 82%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+.aristilia-sheet .inv-draggable { cursor: grab; }
+.aristilia-sheet .backpack-title { margin-top: 8px; }
 
 /* ---------- Ficha de Item ---------- */
-.item-fields label,
-.item-fields .grid-fields label {
+.aristilia-sheet .item-fields label,
+.aristilia-sheet .item-fields .grid-fields label {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -336,8 +303,8 @@
   margin: 4px 0;
   font-size: 0.9em;
 }
-.item-fields label.checkbox { justify-content: flex-start; }
-.item-fields .grid-fields {
+.aristilia-sheet .item-fields label.checkbox { justify-content: flex-start; }
+.aristilia-sheet .item-fields .grid-fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 4px 12px;
@@ -346,18 +313,14 @@
   padding-top: 8px;
 }
 
-/* ---------- Diálogo de creación ---------- */
-.aristilia-create-dialog .field {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
+/* ---------- Diálogo de creación (ventana aparte) ---------- */
+.aristilia-create-dialog .field { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; font-weight: 600; }
 .aristilia-create-dialog .dims { display: flex; gap: 12px; }
 .aristilia-create-dialog .dims .field { flex: 1; }
-.aristilia-create-dialog input {
-  background: rgba(0, 0, 0, 0.3);
+.aristilia-create-dialog .hint { font-size: 0.8em; font-style: italic; opacity: 0.8; }
+.aristilia-create-dialog input,
+.aristilia-create-dialog select {
+  background: rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(201, 168, 106, 0.4);
   border-radius: 4px;
   padding: 3px 6px;
@@ -365,15 +328,16 @@
 }
 
 /* ===========================================================
-   Tarjetas de chat
+   Tarjetas de chat (acotadas a .aristilia.chat-card)
    =========================================================== */
 .aristilia.chat-card {
   border: 1px solid var(--ar-red-dark, #6e2a22);
   border-radius: 6px;
   padding: 8px 10px;
-  background: linear-gradient(180deg, rgba(44, 34, 27, 0.9), rgba(28, 22, 18, 0.95));
+  background: linear-gradient(180deg, rgba(52, 40, 32, 0.92), rgba(34, 27, 22, 0.95));
   color: #e8dfcb;
 }
+.aristilia.chat-card .card-header { display: flex; align-items: center; gap: 8px; }
 .aristilia.chat-card .card-header h3 {
   margin: 0;
   font-variant: small-caps;
@@ -381,23 +345,13 @@
   color: #c9a86a;
   border: none;
 }
-.aristilia.chat-card .flavor { font-style: italic; font-size: 0.85em; color: #a89f8c; }
-.aristilia.chat-card .card-roll {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 6px 0;
-}
-.aristilia.chat-card .dice-formula { font-size: 0.8em; color: #a89f8c; }
-.aristilia.chat-card .dice-total { font-size: 1.7em; font-weight: 700; color: #e8dfcb; }
-.aristilia.chat-card .vs { font-size: 0.55em; color: #a89f8c; margin-left: 4px; }
-.aristilia.chat-card .card-detail {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  font-size: 0.78em;
-  color: #a89f8c;
-}
+.aristilia.chat-card .flavor { font-style: italic; font-size: 0.85em; color: #b8ad97; }
+.aristilia.chat-card .card-roll { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 0; }
+.aristilia.chat-card .dice-formula { font-size: 0.8em; color: #b8ad97; }
+.aristilia.chat-card .dice-total { font-size: 1.7em; font-weight: 700; color: #f0e8d6; }
+.aristilia.chat-card .vs { font-size: 0.55em; color: #b8ad97; margin-left: 4px; }
+.aristilia.chat-card .card-detail { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.78em; color: #b8ad97; }
+.aristilia.chat-card .card-content { font-size: 0.85em; margin-top: 4px; }
 .aristilia.chat-card .card-outcome {
   text-align: center;
   font-weight: 700;
@@ -407,9 +361,7 @@
   padding: 3px;
   border-radius: 4px;
 }
-.outcome-success { background: rgba(46, 110, 46, 0.5); color: #cdeccd; }
-.outcome-critSuccess { background: rgba(30, 120, 30, 0.7); color: #a8e6a8; }
-.outcome-fail { background: rgba(110, 46, 46, 0.5); color: #eccdcd; }
-.outcome-critFail { background: rgba(140, 30, 30, 0.7); color: #f0b0b0; }
-.aristilia.chat-card .card-header { display: flex; align-items: center; gap: 8px; }
-.aristilia.chat-card .card-content { font-size: 0.85em; margin-top: 4px; }
+.aristilia.chat-card .outcome-success { background: rgba(46, 110, 46, 0.55); color: #d4f0d4; }
+.aristilia.chat-card .outcome-critSuccess { background: rgba(30, 130, 30, 0.75); color: #b8f0b8; }
+.aristilia.chat-card .outcome-fail { background: rgba(120, 46, 46, 0.55); color: #f0d4d4; }
+.aristilia.chat-card .outcome-critFail { background: rgba(150, 32, 32, 0.75); color: #f4b8b8; }

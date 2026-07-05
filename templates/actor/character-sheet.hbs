@@ -163,7 +163,7 @@
     <section class="biography">
       <h3>{{localize 'ARISTILIA.Biography'}}</h3>
       {{#if editable}}
-        <prose-mirror name="system.biography" value="{{system.biography}}"></prose-mirror>
+        <prose-mirror name="system.biography" value="{{system.biography}}" document-uuid="{{actor.uuid}}"></prose-mirror>
       {{else}}
         <div class="editor-readonly">{{{enrichedBio}}}</div>
       {{/if}}

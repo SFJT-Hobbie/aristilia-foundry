@@ -130,10 +130,18 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     try { data = JSON.parse(event.dataTransfer.getData('text/plain')); } catch { return; }
     const overGrid = event.target.closest?.('.inventory-grid');
 
-    // Item que ya pertenece al actor -> colocar en la cuadrícula (si se suelta sobre ella)
+    // Item que ya pertenece al actor
     const owned = data.aristiliaItemId && this.document.items.get(data.aristiliaItemId);
     if (owned) {
-      if (overGrid) await this.#placeInGrid(owned, event, overGrid);
+      if (overGrid) {
+        // Soltado sobre la rejilla -> colocar/reposicionar
+        await this.#placeInGrid(owned, event, overGrid);
+      } else if (event.target.closest?.('.inventory-block')) {
+        // Soltado fuera de la rejilla (en la lista de Objetos) -> quitar de la rejilla
+        if (Number.isInteger(owned.system.slot?.x)) {
+          await owned.update({ 'system.slot.x': null, 'system.slot.y': null });
+        }
+      }
       return;
     }
 
@@ -256,8 +264,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         }
       };
     }
-    const [created] = await this.document.createEmbeddedDocuments('Item', [itemData]);
-    created?.sheet.render(true);
+    // Un solo popup: creamos el item ya configurado, sin abrir su ficha.
+    await this.document.createEmbeddedDocuments('Item', [itemData]);
   }
 
   static async #onEditItem(event, target) {
@@ -322,7 +330,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
     const p = catalog[Number(data.idx)];
     if (!p) return;
-    const [created] = await this.document.createEmbeddedDocuments('Item', [{
+    await this.document.createEmbeddedDocuments('Item', [{
       name: p.key,
       type: 'proficiency',
       system: {
@@ -335,7 +343,6 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         skill: 0
       }
     }]);
-    created?.sheet.render(true);
   }
 
   static #onSwitchTab(event, target) {
