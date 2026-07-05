@@ -47,16 +47,27 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     };
 
     // Grid de inventario: items colocados (con slot) vs. mochila (sin colocar)
+    const { cell, gap, pad } = BaseActorSheet.GRID;
+    const cols = actor.system.inventory?.cols ?? 5;
+    const rows = actor.system.inventory?.rows ?? 5;
+    const stride = cell + gap;
     const isPlaced = (i) => Number.isInteger(i.system.slot?.x) && Number.isInteger(i.system.slot?.y);
     context.grid = {
-      cols: actor.system.inventory?.cols ?? 5,
-      rows: actor.system.inventory?.rows ?? 5,
-      cells: (actor.system.inventory?.cols ?? 5) * (actor.system.inventory?.rows ?? 5),
-      placed: inventory.filter(isPlaced).map((i) => ({
-        id: i.id, name: i.name, img: i.img,
-        x: i.system.slot.x, y: i.system.slot.y,
-        w: i.system.size?.w ?? 1, h: i.system.size?.h ?? 1
-      })),
+      cols, rows,
+      cells: cols * rows,
+      widthPx: pad * 2 + cols * cell + (cols - 1) * gap,
+      heightPx: pad * 2 + rows * cell + (rows - 1) * gap,
+      placed: inventory.filter(isPlaced).map((i) => {
+        const w = i.system.size?.w ?? 1;
+        const h = i.system.size?.h ?? 1;
+        return {
+          id: i.id, name: i.name, img: i.img,
+          leftPx: pad + i.system.slot.x * stride,
+          topPx: pad + i.system.slot.y * stride,
+          wPx: w * cell + (w - 1) * gap,
+          hPx: h * cell + (h - 1) * gap
+        };
+      }),
       backpack: inventory.filter((i) => !isPlaced(i))
     };
 
@@ -181,10 +192,52 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static async #onCreateItem(event, target) {
     const type = target.dataset.type;
-    const name = game.i18n.format('ARISTILIA.NewItem', {
-      type: game.i18n.localize(`TYPES.Item.${type}`)
+    const sized = ['weapon', 'armor', 'shield', 'gear'].includes(type);
+    const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
+    const defName = game.i18n.format('ARISTILIA.NewItem', { type: typeLabel });
+    const cols = this.document.system.inventory?.cols ?? 5;
+    const rows = this.document.system.inventory?.rows ?? 5;
+
+    const content = `
+      <div class="aristilia-create-dialog">
+        <label class="field">${game.i18n.localize('ARISTILIA.Name')}
+          <input type="text" name="name" value="${defName}" autofocus />
+        </label>
+        ${sized ? `
+        <div class="dims">
+          <label class="field">${game.i18n.localize('ARISTILIA.Item.width')}
+            <input type="number" name="w" value="1" min="1" max="${cols}" />
+          </label>
+          <label class="field">${game.i18n.localize('ARISTILIA.Item.height')}
+            <input type="number" name="h" value="1" min="1" max="${rows}" />
+          </label>
+        </div>
+        <p class="hint">${game.i18n.localize('ARISTILIA.Item.sizeHint')}</p>` : ''}
+      </div>`;
+
+    const data = await foundry.applications.api.DialogV2.prompt({
+      window: { title: defName, icon: 'fas fa-plus' },
+      content,
+      classes: ['aristilia', 'dialog'],
+      rejectClose: false,
+      ok: {
+        label: game.i18n.localize('ARISTILIA.Add'),
+        callback: (ev, button) => new foundry.applications.ux.FormDataExtended(button.form).object
+      }
     });
-    await this.document.createEmbeddedDocuments('Item', [{ name, type }]);
+    if (!data) return;
+
+    const itemData = { name: (data.name ?? '').trim() || typeLabel, type };
+    if (sized) {
+      itemData.system = {
+        size: {
+          w: Math.min(cols, Math.max(1, Number(data.w) || 1)),
+          h: Math.min(rows, Math.max(1, Number(data.h) || 1))
+        }
+      };
+    }
+    const [created] = await this.document.createEmbeddedDocuments('Item', [itemData]);
+    created?.sheet.render(true);
   }
 
   static async #onEditItem(event, target) {

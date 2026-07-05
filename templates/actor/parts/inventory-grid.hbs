@@ -6,16 +6,17 @@
   </h3>
   <p class="hint">{{localize 'ARISTILIA.Inventory.hint'}}</p>
 
-  <div class="inventory-grid"
-       style="grid-template-columns: repeat({{grid.cols}}, 40px); grid-auto-rows: 40px;">
-    {{#each (aristiliaRange grid.cells) as |cell|}}
-      <div class="grid-cell"></div>
-    {{/each}}
+  <div class="inventory-grid" style="width: {{grid.widthPx}}px; height: {{grid.heightPx}}px;">
+    <div class="grid-bg" style="grid-template-columns: repeat({{grid.cols}}, 40px); grid-auto-rows: 40px;">
+      {{#each (aristiliaRange grid.cells) as |cell|}}
+        <div class="grid-cell"></div>
+      {{/each}}
+    </div>
 
     {{#each grid.placed as |it|}}
       <div class="grid-item inv-draggable" draggable="true" data-item-id="{{it.id}}"
            title="{{it.name}} — {{localize 'ARISTILIA.Inventory.unplaceHint'}}"
-           style="grid-column: {{add it.x 1}} / span {{it.w}}; grid-row: {{add it.y 1}} / span {{it.h}};">
+           style="left: {{it.leftPx}}px; top: {{it.topPx}}px; width: {{it.wPx}}px; height: {{it.hPx}}px;">
         <img src="{{it.img}}" alt="{{it.name}}" />
       </div>
     {{/each}}
@@ -35,5 +36,6 @@
         </span>
       </li>
     {{/each}}
+    {{#unless grid.backpack.length}}<li class="empty">{{localize 'ARISTILIA.Inventory.empty'}}</li>{{/unless}}
   </ol>
 </section>

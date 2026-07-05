@@ -33,6 +33,8 @@
   "ARISTILIA.Inventory.backpack": "Mochila (sin colocar)",
   "ARISTILIA.Inventory.unplaceHint": "doble clic para quitar",
   "ARISTILIA.Inventory.collision": "No hay espacio libre en esa posición del inventario.",
+  "ARISTILIA.Inventory.empty": "Vacío. Crea o arrastra objetos aquí.",
+  "ARISTILIA.Item.sizeHint": "Tamaño en celdas del inventario (ancho × alto).",
   "ARISTILIA.Proficiencies": "Competencias",
   "ARISTILIA.ProfSlots": "Ranuras extra (INT)",
   "ARISTILIA.Spells": "Hechizos",

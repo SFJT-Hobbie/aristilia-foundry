@@ -1,205 +1,359 @@
-/* Estilos del sistema Aristilia */
+/* ===========================================================
+   Aristilia — hoja de estilo (tema oscuro OSR)
+   =========================================================== */
 
 .aristilia-sheet {
-  font-family: "Signika", sans-serif;
-  padding: 8px 12px;
-  overflow-y: auto;
+  --ar-gold: #c9a86a;
+  --ar-gold-dim: #9c8552;
+  --ar-red: #a94438;
+  --ar-red-dark: #6e2a22;
+  --ar-text: #e8dfcb;
+  --ar-muted: #a89f8c;
+  --ar-panel: rgba(28, 22, 18, 0.55);
+  --ar-panel-2: rgba(44, 34, 27, 0.6);
+  --ar-border: rgba(201, 168, 106, 0.35);
+
+  color: var(--ar-text);
+  font-family: "Signika", "Segoe UI", sans-serif;
+  padding: 10px 14px;
   height: 100%;
+  overflow-y: auto;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(110, 42, 34, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(10, 8, 7, 0.35), rgba(10, 8, 7, 0.55));
 }
 
+/* ---------- Campos genéricos ---------- */
+.aristilia-sheet input,
+.aristilia-sheet select,
+.aristilia-sheet .items-list {
+  color: var(--ar-text);
+}
+.aristilia-sheet input[type="text"],
+.aristilia-sheet input[type="number"],
+.aristilia-sheet select {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--ar-border);
+  border-radius: 4px;
+  color: var(--ar-text);
+  padding: 2px 5px;
+  transition: border-color 120ms, box-shadow 120ms;
+}
+.aristilia-sheet input:focus,
+.aristilia-sheet select:focus {
+  outline: none;
+  border-color: var(--ar-gold);
+  box-shadow: 0 0 6px rgba(201, 168, 106, 0.4);
+}
+.aristilia-sheet select option { background: #1b1512; }
+
+/* ---------- Cabecera ---------- */
 .aristilia-sheet .sheet-header {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
-  border-bottom: 2px solid #7a2e2e;
-  padding-bottom: 8px;
-  margin-bottom: 8px;
+  border-bottom: 2px solid var(--ar-red-dark);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 }
-
 .aristilia-sheet .profile-img {
-  flex: 0 0 84px;
-  width: 84px;
-  height: 84px;
+  flex: 0 0 88px;
+  width: 88px;
+  height: 88px;
   object-fit: cover;
-  border: 1px solid #999;
-  border-radius: 4px;
+  border: 2px solid var(--ar-border);
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
 }
-
-.aristilia-sheet .header-fields { flex: 1; }
-.aristilia-sheet .charname { font-size: 1.4em; font-weight: bold; width: 100%; }
-.aristilia-sheet .itemname { font-size: 1.3em; font-weight: bold; width: 100%; }
+.aristilia-sheet .header-fields { flex: 1; min-width: 0; }
+.aristilia-sheet .charname,
+.aristilia-sheet .itemname {
+  font-family: "Modesto Condensed", "Signika", serif;
+  font-size: 1.5em;
+  font-weight: 700;
+  width: 100%;
+  letter-spacing: 0.5px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--ar-gold);
+}
+.aristilia-sheet .charname:focus,
+.aristilia-sheet .itemname:focus { border-bottom-color: var(--ar-gold); box-shadow: none; }
 
 .aristilia-sheet .header-row {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 .aristilia-sheet .header-row label {
   display: flex;
   flex-direction: column;
-  font-size: 0.8em;
+  gap: 2px;
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ar-muted);
   flex: 1;
-  min-width: 90px;
+  min-width: 96px;
 }
 .aristilia-sheet label.derived { justify-content: center; }
+.aristilia-sheet label.derived b { color: var(--ar-gold); font-size: 1.3em; }
 
-/* Atributos */
-.attributes-block h3,
-.combat-block + section h3,
-.aristilia-sheet section > h3 {
-  border-bottom: 1px solid #b7987a;
-  margin: 10px 0 6px;
+/* ---------- Títulos de sección ---------- */
+.aristilia-sheet section > h3,
+.aristilia-sheet section > h4 {
+  font-family: "Modesto Condensed", "Signika", serif;
   font-variant: small-caps;
+  letter-spacing: 1px;
+  color: var(--ar-gold);
+  border-bottom: 1px solid var(--ar-border);
+  margin: 14px 0 8px;
+  padding-bottom: 2px;
+  font-weight: 600;
 }
+.aristilia-sheet section > h3 i.fa-plus { color: var(--ar-red); }
+.item-create { float: right; cursor: pointer; }
+.item-create:hover i { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
+.hint { font-size: 0.75em; color: var(--ar-muted); font-style: italic; margin: 2px 0 6px; }
 
+/* ---------- Atributos ---------- */
 .attributes-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 .attribute {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 1px solid #b7987a;
-  border-radius: 4px;
-  padding: 4px;
-  background: rgba(183, 152, 122, 0.08);
+  gap: 3px;
+  border: 1px solid var(--ar-border);
+  border-radius: 6px;
+  padding: 6px 4px;
+  background: var(--ar-panel);
+  transition: transform 120ms, box-shadow 120ms;
 }
+.attribute:hover { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4); }
 .attribute-name {
   font-variant: small-caps;
-  font-weight: bold;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--ar-text);
   cursor: pointer;
 }
-.attribute-name:hover { color: #7a2e2e; text-shadow: 0 0 4px #d18b8b; }
-.attribute-value { width: 46px; text-align: center; font-size: 1.1em; }
-.attribute-mod { font-weight: bold; color: #4a4; }
+.attribute-name:hover { color: var(--ar-gold); text-shadow: 0 0 8px rgba(201, 168, 106, 0.6); }
+.attribute-value {
+  width: 52px;
+  text-align: center;
+  font-size: 1.25em;
+  font-weight: 700;
+}
+.attribute-mod {
+  font-weight: 700;
+  color: var(--ar-gold);
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 10px;
+  padding: 0 8px;
+  min-width: 34px;
+  text-align: center;
+}
 
-/* Bloque de combate */
+/* ---------- Bloque de combate ---------- */
 .combat-block {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin: 8px 0;
+  gap: 8px;
+  margin: 10px 0;
 }
 .combat-block .stat {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 4px 6px;
-  font-size: 0.85em;
+  border: 1px solid var(--ar-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.82em;
+  background: var(--ar-panel);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
 }
-.combat-block .stat label { font-weight: bold; font-variant: small-caps; }
-.combat-block .stat input[type="number"] { width: 48px; }
-.ac-total { font-size: 1.2em; font-weight: bold; color: #2a4a7a; }
+.combat-block .stat label {
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.5px;
+  color: var(--ar-muted);
+}
+.combat-block .stat b { color: var(--ar-gold); }
+.combat-block .stat input[type="number"] { width: 46px; text-align: center; }
+.ac-total {
+  font-size: 1.35em;
+  font-weight: 700;
+  color: var(--ar-gold);
+}
+.ac-equipped { color: var(--ar-gold-dim); font-style: italic; }
 
-/* Listas de items */
+/* ---------- Listas de items ---------- */
 .items-list { list-style: none; margin: 0; padding: 0; }
 .items-list .item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 4px;
-  border-bottom: 1px dashed #ccc;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: background 120ms, border-color 120ms;
 }
-.items-list .item-name { flex: 1; }
-.items-list .item-detail { font-size: 0.8em; color: #666; }
-.items-list .item-controls { display: flex; gap: 6px; }
-.items-list .item-controls a { cursor: pointer; color: #7a2e2e; }
-.items-list .item-icon { width: 24px; height: 24px; object-fit: cover; }
-.item-create { float: right; cursor: pointer; color: #4a7a2e; }
-.items-list .item.equipped { background: rgba(42, 74, 122, 0.12); border-left: 3px solid #2a4a7a; }
-.items-list .item-controls a.on { color: #2a4a7a; text-shadow: 0 0 4px #8bb0d1; }
-.ac-equipped { color: #2a4a7a; font-style: italic; }
+.items-list .item:hover { background: var(--ar-panel-2); border-color: var(--ar-border); }
+.items-list .item-name { flex: 1; font-weight: 600; }
+.items-list .item-detail { font-size: 0.78em; color: var(--ar-muted); }
+.items-list .item-controls { display: flex; gap: 8px; }
+.items-list .item-controls a { cursor: pointer; color: var(--ar-muted); }
+.items-list .item-controls a:hover { color: var(--ar-gold); }
+.items-list .item-icon { width: 26px; height: 26px; object-fit: contain; border-radius: 3px; }
+.items-list .item.equipped { background: rgba(169, 68, 56, 0.16); border-color: var(--ar-red); }
+.items-list .item-controls a.on { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
+.items-list .empty { color: var(--ar-muted); font-style: italic; padding: 4px 6px; font-size: 0.85em; }
 
-/* Grid de inventario (cell 40 + gap 2 + pad 4 => coincide con actor-sheet.mjs GRID) */
+/* ---------- Inventario tipo grid ---------- */
+/* cell 40 + gap 2 + pad 4  =>  coincide con actor-sheet.mjs GRID */
 .inventory-grid {
-  display: grid;
-  gap: 2px;
+  position: relative;
   margin: 6px 0;
   padding: 4px;
-  background: rgba(0, 0, 0, 0.04);
-  border: 1px solid #b7987a;
-  border-radius: 4px;
-  width: fit-content;
-  position: relative;
+  border: 1px solid var(--ar-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
+}
+.grid-bg {
+  position: absolute;
+  inset: 4px;
+  display: grid;
+  gap: 2px;
 }
 .grid-cell {
   width: 40px;
   height: 40px;
-  border: 1px solid #cbb79a;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 2px;
+  border-radius: 3px;
+  background: rgba(201, 168, 106, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(201, 168, 106, 0.14);
 }
 .grid-item {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #7a2e2e;
-  background: rgba(122, 46, 46, 0.15);
-  border-radius: 3px;
+  border: 1px solid var(--ar-gold-dim);
+  background: linear-gradient(160deg, rgba(169, 68, 56, 0.35), rgba(110, 42, 34, 0.45));
+  border-radius: 4px;
   cursor: grab;
   z-index: 2;
   overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 120ms;
 }
+.grid-item:hover { box-shadow: 0 0 8px rgba(201, 168, 106, 0.6); }
 .grid-item:active { cursor: grabbing; }
-.grid-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.grid-item img { width: 82%; height: 82%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
 .inv-draggable { cursor: grab; }
-.backpack-title { margin: 8px 0 2px; font-size: 0.9em; font-variant: small-caps; color: #555; }
-.hint { font-size: 0.75em; color: #777; font-style: italic; margin: 2px 0; }
+.backpack-title { margin-top: 8px; }
 
-/* Tarjetas de chat */
-.aristilia.chat-card {
-  border: 1px solid #7a2e2e;
-  border-radius: 5px;
-  padding: 6px 8px;
-  background: rgba(183, 152, 122, 0.1);
+/* ---------- Biografía / prosemirror ---------- */
+prose-mirror {
+  display: block;
+  min-height: 90px;
+  border: 1px solid var(--ar-border);
+  border-radius: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.25);
 }
-.aristilia.chat-card .card-header h3 { margin: 0; font-variant: small-caps; }
-.aristilia.chat-card .flavor { font-style: italic; font-size: 0.85em; color: #555; }
-.aristilia.chat-card .card-roll {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 4px 0;
-}
-.aristilia.chat-card .dice-total { font-size: 1.5em; font-weight: bold; }
-.aristilia.chat-card .vs { font-size: 0.6em; color: #666; }
-.aristilia.chat-card .card-detail {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 0.8em;
-  color: #555;
-}
-.aristilia.chat-card .card-outcome {
-  text-align: center;
-  font-weight: bold;
-  font-variant: small-caps;
-  margin-top: 4px;
-  padding: 2px;
-  border-radius: 3px;
-}
-.outcome-success { background: #cdeccd; color: #1a5c1a; }
-.outcome-critSuccess { background: #a8e6a8; color: #0d4d0d; }
-.outcome-fail { background: #eccdcd; color: #6c1a1a; }
-.outcome-critFail { background: #e6a8a8; color: #4d0d0d; }
 
+/* ---------- Ficha de Item ---------- */
 .item-fields label,
 .item-fields .grid-fields label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  margin: 3px 0;
+  gap: 8px;
+  margin: 4px 0;
   font-size: 0.9em;
 }
+.item-fields label.checkbox { justify-content: flex-start; }
 .item-fields .grid-fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 4px 10px;
-  border-top: 1px dashed #ccc;
-  margin-top: 6px;
-  padding-top: 6px;
+  gap: 4px 12px;
+  border-top: 1px solid var(--ar-border);
+  margin-top: 8px;
+  padding-top: 8px;
 }
-prose-mirror { display: block; min-height: 80px; border: 1px solid #ccc; border-radius: 4px; padding: 4px; }
+
+/* ---------- Diálogo de creación ---------- */
+.aristilia-create-dialog .field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.aristilia-create-dialog .dims { display: flex; gap: 12px; }
+.aristilia-create-dialog .dims .field { flex: 1; }
+.aristilia-create-dialog input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(201, 168, 106, 0.4);
+  border-radius: 4px;
+  padding: 3px 6px;
+  color: inherit;
+}
+
+/* ===========================================================
+   Tarjetas de chat
+   =========================================================== */
+.aristilia.chat-card {
+  border: 1px solid var(--ar-red-dark, #6e2a22);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: linear-gradient(180deg, rgba(44, 34, 27, 0.9), rgba(28, 22, 18, 0.95));
+  color: #e8dfcb;
+}
+.aristilia.chat-card .card-header h3 {
+  margin: 0;
+  font-variant: small-caps;
+  letter-spacing: 0.5px;
+  color: #c9a86a;
+  border: none;
+}
+.aristilia.chat-card .flavor { font-style: italic; font-size: 0.85em; color: #a89f8c; }
+.aristilia.chat-card .card-roll {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 6px 0;
+}
+.aristilia.chat-card .dice-formula { font-size: 0.8em; color: #a89f8c; }
+.aristilia.chat-card .dice-total { font-size: 1.7em; font-weight: 700; color: #e8dfcb; }
+.aristilia.chat-card .vs { font-size: 0.55em; color: #a89f8c; margin-left: 4px; }
+.aristilia.chat-card .card-detail {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.78em;
+  color: #a89f8c;
+}
+.aristilia.chat-card .card-outcome {
+  text-align: center;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 1px;
+  margin-top: 6px;
+  padding: 3px;
+  border-radius: 4px;
+}
+.outcome-success { background: rgba(46, 110, 46, 0.5); color: #cdeccd; }
+.outcome-critSuccess { background: rgba(30, 120, 30, 0.7); color: #a8e6a8; }
+.outcome-fail { background: rgba(110, 46, 46, 0.5); color: #eccdcd; }
+.outcome-critFail { background: rgba(140, 30, 30, 0.7); color: #f0b0b0; }
+.aristilia.chat-card .card-header { display: flex; align-items: center; gap: 8px; }
+.aristilia.chat-card .card-content { font-size: 0.85em; margin-top: 4px; }
