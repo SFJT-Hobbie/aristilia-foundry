@@ -33,7 +33,7 @@
   "ARISTILIA.Armor": "Armaduras y Escudos",
   "ARISTILIA.Equip": "Equipar",
   "ARISTILIA.Unequip": "Desequipar",
-  "ARISTILIA.Inventory": "Inventario",
+  "ARISTILIA.Inventory.title": "Inventario",
   "ARISTILIA.Inventory.hint": "Arrastra objetos de la mochila a la cuadrícula para colocarlos. Doble clic sobre un objeto colocado para devolverlo a la mochila.",
   "ARISTILIA.Inventory.backpack": "Mochila (sin colocar)",
   "ARISTILIA.Inventory.unplaceHint": "doble clic para quitar",

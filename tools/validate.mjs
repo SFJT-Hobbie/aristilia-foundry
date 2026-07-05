@@ -25,8 +25,13 @@ for (const s of sys.styles) {
 for (const l of sys.languages) {
   const p = join(root, l.path);
   if (!existsSync(p)) { fail(`falta idioma ${l.path}`); continue; }
-  JSON.parse(readFileSync(p, 'utf8'));
-  ok(`idioma ${l.path} válido`);
+  const dict = JSON.parse(readFileSync(p, 'utf8'));
+  // Colisiones: una clave no puede ser texto y a la vez prefijo (con punto) de otra,
+  // porque Foundry expande las claves con puntos a objetos anidados (rompe todo el archivo).
+  const keys = Object.keys(dict);
+  const collisions = keys.filter((a) => keys.some((b) => b.startsWith(a + '.')));
+  if (collisions.length) fail(`idioma ${l.path}: claves en colisión (texto y prefijo): ${collisions.join(', ')}`);
+  else ok(`idioma ${l.path} válido (sin colisiones)`);
 }
 for (const pk of sys.packs ?? []) {
   existsSync(join(root, pk.path)) ? ok(`pack dir ${pk.path}`) : fail(`falta pack dir ${pk.path}`);
