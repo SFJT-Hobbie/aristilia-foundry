@@ -64,6 +64,13 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         weapon: new fields.ArrayField(new fields.StringField()),
         nonWeapon: new fields.ArrayField(new fields.StringField())
       }),
+      // Monedero e idiomas (aditivos): importados de la web-app; no derivados.
+      currency: new fields.SchemaField({
+        gold: new fields.NumberField({ integer: true, initial: 0, min: 0 }),
+        silver: new fields.NumberField({ integer: true, initial: 0, min: 0 }),
+        copper: new fields.NumberField({ integer: true, initial: 0, min: 0 })
+      }),
+      languages: new fields.StringField({ initial: '' }),
       biography: new fields.HTMLField({ initial: '' })
     };
   }

@@ -2,7 +2,7 @@
   "id": "aristilia",
   "title": "Aristilia",
   "description": "Sistema OSR de mesa Aristilia para Foundry VTT. Resolución Target20 y competencias d100%, atributos con tabla de modificadores propia, tres clases (Guerrero, Usuario de Magia, Especialista), seis razas y tres escuelas de magia. Adaptado de la web-app de reglas de Aristilia.",
-  "version": "0.13.3",
+  "version": "0.14.0",
   "compatibility": {
     "minimum": "13",
     "verified": "14",
@@ -92,6 +92,13 @@
       "label": "Tesoro: tablas y botín (Aristilia)",
       "path": "packs/treasure",
       "type": "Macro",
+      "system": "aristilia"
+    },
+    {
+      "name": "characters",
+      "label": "Personajes (Aristilia)",
+      "path": "packs/characters",
+      "type": "Actor",
       "system": "aristilia"
     }
   ],

@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.13.3';
+const SYSTEM_VERSION = '0.14.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -407,6 +407,126 @@ function buildSpells() {
   }));
 }
 
+function docStats() {
+  return { systemId: 'aristilia', systemVersion: SYSTEM_VERSION, coreVersion: '14', createdTime: 0, modifiedTime: 0, lastModifiedBy: null };
+}
+
+/** Importa los personajes de la web-app (SQL) al modelo de Aristilia. */
+function buildCharacters() {
+  const raw = JSON.parse(readFileSync(join(root, 'tools', 'characters-source.json'), 'utf8'));
+  const docs = [];
+
+  const RACE = { human: 'human', dwarf: 'dwarf', elf: 'elf', halfling: 'halfling', beastmen: 'beastmen', verdant: 'verdant' };
+  const CLASS = { fighter: 'fighter', warrior: 'fighter', warriro: 'fighter', 'magic user': 'magicUser', magicuser: 'magicUser', specialist: 'specialist' };
+  const ALIGN = { lawful: 'lawful', neutral: 'neutral', chaotic: 'chaotic' };
+  const NPCTYPE = { beast: 'beast', humanoid: 'humanoid', monster: 'monster', vehicle: 'vehicle' };
+  const ATTR = { strength: 'str', dexterity: 'dex', constitution: 'con', intelligence: 'int', wisdom: 'wis', charisma: 'cha' };
+
+  const mapKey = (m, v, def) => m[String(v ?? '').toLowerCase().trim()] ?? def;
+  const num = (v, def = 0) => { const n = Number(v); return Number.isFinite(n) ? Math.trunc(n) : def; };
+  const lastInt = (v) => {
+    if (typeof v === 'number') return Math.trunc(v);
+    const m = String(v ?? '').match(/-?\d+/g);
+    return m ? parseInt(m[m.length - 1], 10) : 0;
+  };
+  const toHtml = (s) => String(s ?? '').replace(/\\n/g, '<br>').replace(/\r?\n/g, '<br>').trim();
+  const spaceCamel = (s) => String(s).replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2');
+
+  function classify(name) {
+    const n = String(name).toLowerCase();
+    if (/escudo|rodela|broquel/.test(n)) return 'shield';
+    if (/armadura|cota|malla|coraza|chainmail|plate|placas|restos de cuero/.test(n)) return 'armor';
+    if (/espad[oó]?n?|arco|daga|ballesta|hacha|maza|lanza|bast[oó]n|martillo|honda|greatsword|sword|hammer|glaive|quarterstaff/.test(n)) return 'weapon';
+    return 'gear';
+  }
+
+  const folders = { PC: makeId('charfolder:PC'), NPC: makeId('charfolder:NPC') };
+  docs.push(makeFolder({ seed: 'charfolder:PC', name: 'Jugadores', type: 'Actor', sort: 100000 }));
+  docs.push(makeFolder({ seed: 'charfolder:NPC', name: 'PNJ (campaña)', type: 'Actor', sort: 200000 }));
+
+  for (const c of raw) {
+    const s = c.data ?? {};
+    const isPC = c.type !== 'NPC';
+
+    // Items embebidos SIN colocar en la rejilla (mochila) + competencias rollables.
+    const items = [];
+    for (const e of (s.equipment ?? [])) {
+      const kind = classify(e.name ?? '');
+      const w = e.slot_position?.w ?? 1;
+      const h = e.slot_position?.h ?? 1;
+      const base = { name: e.name ?? 'Objeto', description: '', size: { w, h }, slot: { x: null, y: null, equipped: false }, quantity: 1, weight: 0, price: 0 };
+      const sys = kind === 'weapon'
+        ? { ...base, proficiency: '', damage: '1d6', ranged: false, range: '', attackBonus: 0, condition: '' }
+        : (kind === 'armor' || kind === 'shield') ? { ...base, ac: 0 }
+        : { ...base, category: 'supplies' };
+      const _id = makeId(`item:${c.name}:${e.id ?? e.name}`);
+      items.push({ _id, name: base.name, type: kind, img: ICONS[kind] ?? 'icons/svg/item-bag.svg', system: sys, effects: [], folder: null, sort: 0, flags: {}, _stats: docStats() });
+    }
+    for (const p of (s.nonWeaponProficiencies ?? [])) {
+      const _id = makeId(`prof:${c.name}:${p.name}`);
+      items.push({ _id, name: spaceCamel(p.name ?? 'Competencia'), type: 'proficiency', img: ICONS.proficiency, system: { description: '', kind: 'nonWeapon', category: '', attribute: 'int', slots: 1, difficulty: '', skill: num(p.value, 0), restriction: '' }, effects: [], folder: null, sort: 0, flags: {}, _stats: docStats() });
+    }
+
+    const img = s.picture || (isPC ? 'icons/svg/mystery-man.svg' : MONSTER_ICON_DEFAULT);
+    // Nota de CA importada (los campos equippedArmor/Shield de la web-app son inconsistentes).
+    const acNote = [s.equippedArmor, s.equippedShield].filter((x) => x && String(x).trim() && String(x) !== '0')
+      .map((x) => String(x)).join(' · ');
+    let bio = toHtml(s.description);
+    if (isPC && acNote) bio += `${bio ? '<br>' : ''}<em>CA importada (revisar): ${acNote}</em>`;
+
+    let system, actorType, folder;
+    if (isPC) {
+      actorType = 'character';
+      folder = folders.PC;
+      const ab = s.abilityScores ?? {};
+      const attrs = {};
+      for (const [src, key] of Object.entries(ATTR)) attrs[key] = { value: num(ab?.[src], 10) };
+      const hpMax = num(s.hitPoints ?? s.hp, 1) || 1;
+      system = {
+        attributes: attrs,
+        details: {
+          race: mapKey(RACE, s.race, 'human'), class: mapKey(CLASS, s.class, 'fighter'),
+          level: num(s.level, 1) || 1, xp: num(s.xp, 0), alignment: mapKey(ALIGN, s.alignment, 'neutral'),
+          ageStage: s.ageStage || 'adult', rollMethod: 'heroic', status: s.status || 'alive',
+          deathDate: s.deathDate || '', deathDescription: s.deathDescription || '', restingSite: s.restingSite || ''
+        },
+        hp: { value: num(s.currentHP, hpMax), max: hpMax },
+        ac: { armor: lastInt(s.equippedArmor), shield: lastInt(s.equippedShield) },
+        combat: { bonusToHit: num(s.bonusToHit, 0), bonusToSave: num(s.bonusToSave, 0), targetAC: 0 },
+        proficiencies: { weapon: (s.weaponProficiencies ?? []).map(String), nonWeapon: [] },
+        currency: { gold: num(s.currency?.gold, 0), silver: num(s.currency?.silver, 0), copper: num(s.currency?.copper, 0) },
+        languages: (s.languages ?? []).map(String).join(', '),
+        biography: bio
+      };
+    } else {
+      actorType = 'npc';
+      folder = folders.NPC;
+      const hdInt = num(s.hd, 1);
+      const hpMax = num(s.hp, 0) > 0 ? num(s.hp) : Math.max(1, Math.round(hdInt * 4.5));
+      system = {
+        npcType: mapKey(NPCTYPE, s.npcType, 'monster'), creatureType: '', biome: '',
+        alignment: mapKey(ALIGN, s.alignment, 'neutral'), hd: hdInt, hitDiceText: '',
+        hp: { value: hpMax, max: hpMax }, ac: lastInt(s.ac), save: num(s.save, 0), bonusToHit: num(s.bonusToHit, 0),
+        attacks: '', special: '', movement: { close: num(s.closeQuarterMovement, 30), open: num(s.openFieldMovement, 120) },
+        moveText: '', morale: 0, xp: num(s.xp, 0), challengeLevel: '', numberEncountered: '',
+        treasureType: 'Nil', treasureAdd: '', treasureSource: '', source: 'web-app', sourceRef: '',
+        inventory: { cols: 5, rows: 5 },
+        proficiencies: { weapon: (s.weaponProficiencies ?? []).map(String), nonWeapon: [] },
+        description: bio
+      };
+    }
+
+    const _id = makeId(`char:${c.name}:${c.user_id}`);
+    docs.push({
+      _id, _key: `!actors!${_id}`, name: c.name, type: actorType, img, system, items,
+      prototypeToken: { name: c.name, displayName: 20, actorLink: isPC, disposition: isPC ? 1 : 0, texture: { src: img } },
+      effects: [], folder, sort: 0, ownership: { default: 0 },
+      flags: { aristilia: { sourceUserId: c.user_id } }, _stats: docStats()
+    });
+  }
+  return docs;
+}
+
 function buildTreasure() {
   // Los datos B/X se inyectan como prefijo en el command de cada macro, así son
   // autocontenidas (solo dependen de APIs estables de Foundry: Roll/ChatMessage/DialogV2).
@@ -448,6 +568,7 @@ const races = buildRaces();
 const classes = buildClasses();
 const monsters = buildMonsters();
 const treasure = buildTreasure();
+const characters = buildCharacters();
 
 await writePack('gear', gear);
 await writePack('proficiencies', profs);
@@ -456,6 +577,7 @@ await writePack('races', races);
 await writePack('classes', classes);
 await writePack('monsters', monsters);
 await writePack('treasure', treasure);
+await writePack('characters', characters);
 
-const total = gear.length + profs.length + spells.length + races.length + classes.length + monsters.length + treasure.length;
-console.log(`\nTotal: ${total} documentos compilados en 7 compendios.`);
+const total = gear.length + profs.length + spells.length + races.length + classes.length + monsters.length + treasure.length + characters.length;
+console.log(`\nTotal: ${total} documentos compilados en 8 compendios.`);

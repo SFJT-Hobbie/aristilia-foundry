@@ -56,6 +56,11 @@
   "ARISTILIA.Spells": "Hechizos",
   "ARISTILIA.Biography": "Biografía",
   "ARISTILIA.Description": "Descripción",
+  "ARISTILIA.Languages": "Idiomas",
+  "ARISTILIA.Currency.title": "Moneda",
+  "ARISTILIA.Currency.gold": "Oro",
+  "ARISTILIA.Currency.silver": "Plata",
+  "ARISTILIA.Currency.copper": "Cobre",
 
   "ARISTILIA.Attr.str": "Fuerza",
   "ARISTILIA.Attr.dex": "Destreza",

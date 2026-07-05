@@ -438,6 +438,19 @@
 .aristilia-sheet .inv-draggable { cursor: grab; }
 .aristilia-sheet .backpack-title { margin-top: 8px; }
 
+/* Moneda e idiomas (ficha de personaje) */
+.aristilia-sheet .resources-block { margin: 14px 0 4px; display: flex; flex-direction: column; gap: 8px; }
+.aristilia-sheet .resources-block .currency { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.aristilia-sheet .resources-block .cur-label {
+  font-variant: small-caps; font-weight: 700; letter-spacing: 0.4px; color: var(--ar-oxblood);
+}
+.aristilia-sheet .resources-block .currency label {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.85em; font-variant: small-caps; color: var(--ar-ink-soft);
+}
+.aristilia-sheet .resources-block .currency input[type="number"] { width: 64px; text-align: center; }
+.aristilia-sheet .resources-block .languages { display: flex; align-items: center; gap: 8px; font-variant: small-caps; font-weight: 700; color: var(--ar-oxblood); }
+.aristilia-sheet .resources-block .languages input { flex: 1; }
+
 /* Control de tamaño de rejilla del PNJ (definido por el GM) */
 .aristilia-sheet .npc-grid-size {
   display: flex;
