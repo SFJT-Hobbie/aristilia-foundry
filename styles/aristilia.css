@@ -47,19 +47,31 @@
   box-shadow: 0 0 6px rgba(201, 168, 106, 0.4);
 }
 .aristilia-sheet select option { background: #1b1512; }
-/* Editor ProseMirror nativo (siempre activo). */
+/* Editor ProseMirror nativo (siempre activo).
+   La barra de herramientas del núcleo es position:absolute y se superpone a la
+   primera línea. Forzamos (con !important, que vence la capa exceptions.prosemirror)
+   que la barra fluya en columna ENCIMA del contenido, no sobre él. */
 .aristilia-sheet prose-mirror {
-  position: relative;
-  display: block;
-  min-height: 160px;
+  display: flex !important;
+  flex-direction: column;
+  min-height: 210px;
   border: 1px solid var(--ar-border);
   border-radius: 6px;
-  padding: 4px;
   background: rgba(0, 0, 0, 0.22);
+  overflow: hidden;
 }
-.aristilia-sheet prose-mirror .editor-container,
+.aristilia-sheet prose-mirror .menu-container,
+.aristilia-sheet prose-mirror .editor-menu {
+  position: relative !important;
+  flex: 0 0 auto;
+}
+.aristilia-sheet prose-mirror .editor-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 6px;
+}
 .aristilia-sheet prose-mirror .editor-content,
-.aristilia-sheet prose-mirror .ProseMirror { min-height: 120px; }
+.aristilia-sheet prose-mirror .ProseMirror { min-height: 110px; }
 .aristilia-sheet prose-mirror .ProseMirror { cursor: text; outline: none; }
 .aristilia-sheet .editor-readonly {
   border: 1px solid var(--ar-border);
