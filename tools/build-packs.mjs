@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.13.0';
+const SYSTEM_VERSION = '0.13.3';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -249,7 +249,10 @@ function buildMonsters() {
         hitDiceText: m.hit_dice ?? '',
         hp: { value: hpMax, max: hpMax },
         ac: leadingInt(m.ac_desc),
-        save: leadingInt(m.saving_throw),
+        // El bestiario da la salvación como objetivo "roll-over" (d20 ≥ S, menor = mejor);
+        // Aristilia usa un bono aditivo en Target20 (1d20 + bono ≥ 20, mayor = mejor).
+        // Conversión que iguala probabilidades: bono = 20 − S. Sin dato → proxy = HD.
+        save: (m.saving_throw == null) ? hdInt : Math.max(0, 20 - leadingInt(m.saving_throw)),
         bonusToHit: hdInt, // convención Target20: bono ≈ Dados de Golpe
         attacks: m.attacks ?? '',
         special: m.special ?? '',
