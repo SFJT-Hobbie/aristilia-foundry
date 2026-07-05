@@ -158,9 +158,39 @@
   border-color: var(--ar-border);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3) inset;
 }
-.aristilia-sheet .tab-content { display: none; }
-.aristilia-sheet .tab-content.active { display: block; animation: ar-fade 150ms ease; }
+/* Solo se renderiza la pestaña activa (no display:none), así los editores se crean visibles. */
+.aristilia-sheet .tab-content { display: block; animation: ar-fade 120ms ease; }
 @keyframes ar-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Casilla de modificador situacional */
+.aristilia-sheet .situational-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  padding: 4px 8px;
+  border: 1px dashed var(--ar-border);
+  border-radius: 6px;
+  background: var(--ar-panel);
+}
+.aristilia-sheet .situational-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-variant: small-caps;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ar-gold);
+}
+.aristilia-sheet .situational-toggle .hint { margin: 0; }
+
+/* Estadística con botón de tirada (salvación) */
+.aristilia-sheet .rollable-stat .stat-roll {
+  cursor: pointer;
+  color: var(--ar-muted);
+  order: -1;
+}
+.aristilia-sheet .rollable-stat .stat-roll:hover { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
 
 /* ---------- Badges ---------- */
 .aristilia-sheet .badge {

@@ -21,10 +21,11 @@ async function renderChat(actor, template, data) {
  * Resolución Target20.
  * @param {object} p  { actor, label, mod, bonusToHit, targetAC, flavor }
  */
-export async function rollTarget20({ actor, label, mod = 0, bonusToHit = 0, targetAC = 0, flavor } = {}) {
+export async function rollTarget20({ actor, label, mod = 0, bonusToHit = 0, targetAC = 0, situational = 0, flavor } = {}) {
   const parts = ['1d20'];
   if (mod) parts.push(`${mod}`);
   if (bonusToHit) parts.push(`${bonusToHit}`);
+  if (situational) parts.push(`${situational}`);
   if (targetAC) parts.push(`${targetAC}`);
   const roll = await new Roll(parts.join(' + ')).evaluate();
 
@@ -44,6 +45,7 @@ export async function rollTarget20({ actor, label, mod = 0, bonusToHit = 0, targ
     die,
     modText: mod ? formatMod(mod) : null,
     bonusToHit: bonusToHit || null,
+    situational: situational ? formatMod(situational) : null,
     targetAC: targetAC || null,
     outcome,
     outcomeLabel: game.i18n.localize(`ARISTILIA.Outcome.${outcome}`),
@@ -82,7 +84,7 @@ export async function rollSkillD100({ actor, label, skill = 0 } = {}) {
  * Ataque con arma: usa STR (cuerpo a cuerpo) o DEX (proyectil) del actor.
  * @param {object} p  { actor, item, targetAC }
  */
-export async function rollWeaponAttack({ actor, item, targetAC = 0 } = {}) {
+export async function rollWeaponAttack({ actor, item, targetAC = 0, situational = 0 } = {}) {
   const sys = actor.system;
   const attrKey = item.system.ranged ? 'dex' : 'str';
   const mod = sys.attributes?.[attrKey]?.mod ?? 0;
@@ -93,6 +95,7 @@ export async function rollWeaponAttack({ actor, item, targetAC = 0 } = {}) {
     label: `${item.name} — ${game.i18n.localize('ARISTILIA.Roll.attack')}`,
     mod,
     bonusToHit,
+    situational,
     targetAC,
     flavor: game.i18n.format('ARISTILIA.Roll.attackWith', { attr: game.i18n.localize(`ARISTILIA.Attr.${attrKey}`) })
   });

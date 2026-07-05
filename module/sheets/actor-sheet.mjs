@@ -22,8 +22,10 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     form: { submitOnChange: true },
     actions: {
       rollAttribute: BaseActorSheet.#onRollAttribute,
+      rollSave: BaseActorSheet.#onRollSave,
       rollSkill: BaseActorSheet.#onRollSkill,
       rollWeapon: BaseActorSheet.#onRollWeapon,
+      toggleSituational: BaseActorSheet.#onToggleSituational,
       createItem: BaseActorSheet.#onCreateItem,
       editItem: BaseActorSheet.#onEditItem,
       deleteItem: BaseActorSheet.#onDeleteItem,
@@ -37,6 +39,9 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** Pestaña activa (persistida entre renders). */
   _activeTab = 'main';
 
+  /** ¿Preguntar por un modificador situacional en la próxima tirada? */
+  _situational = false;
+
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
@@ -46,6 +51,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     context.config = ARISTILIA;
     context.editable = this.isEditable;
     context.activeTab = this._activeTab;
+    context.situational = this._situational;
 
     // Items agrupados por tipo
     const inventory = actor.items.filter((i) => ['weapon', 'armor', 'shield', 'gear'].includes(i.type));
@@ -105,7 +111,6 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** @override — engancha listeners tras cada render. */
   _onRender(context, options) {
     super._onRender(context, options);
-    this.#applyTabs();
     const root = this.element;
     if (!root || !this.isEditable) return;
 
@@ -212,11 +217,52 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null });
   }
 
-  /* ---------- Acciones ---------- */
+  /* ---------- Modificador situacional ---------- */
+
+  static #onToggleSituational(event, target) {
+    this._situational = target.checked;
+  }
+
+  /**
+   * Devuelve el modificador situacional a aplicar en una tirada:
+   *  - 0 si la casilla no está marcada.
+   *  - null si el jugador cancela el diálogo (abortar la tirada).
+   *  - el número introducido en caso contrario (si es 0, desmarca la casilla).
+   */
+  async #promptSituational() {
+    if (!this._situational) return 0;
+    const result = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize('ARISTILIA.Situational.title'), icon: 'fas fa-dice' },
+      content: `<div class="aristilia-create-dialog">
+        <label class="field">${game.i18n.localize('ARISTILIA.Situational.label')}
+          <input type="number" name="mod" value="0" step="1" autofocus />
+        </label>
+        <p class="hint">${game.i18n.localize('ARISTILIA.Situational.hint')}</p>
+      </div>`,
+      classes: ['aristilia', 'dialog'],
+      rejectClose: false,
+      ok: {
+        label: game.i18n.localize('ARISTILIA.Roll.roll'),
+        callback: (ev, button) => Number(new foundry.applications.ux.FormDataExtended(button.form).object.mod) || 0
+      }
+    });
+    if (result === null || result === undefined) return null; // cancelado
+    if (result === 0) { this._situational = false; this.render(); } // 0 => desmarcar
+    return result;
+  }
+
+  /* ---------- Acciones de tirada ---------- */
 
   static async #onRollAttribute(event, target) {
-    const key = target.dataset.attr;
-    await this.document.rollAttribute(key);
+    const situational = await this.#promptSituational();
+    if (situational === null) return;
+    await this.document.rollAttribute(target.dataset.attr, { situational });
+  }
+
+  static async #onRollSave(event, target) {
+    const situational = await this.#promptSituational();
+    if (situational === null) return;
+    await this.document.rollSave({ situational });
   }
 
   static async #onRollSkill(event, target) {
@@ -225,7 +271,9 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   }
 
   static async #onRollWeapon(event, target) {
-    await this.document.rollWeapon(target.dataset.itemId);
+    const situational = await this.#promptSituational();
+    if (situational === null) return;
+    await this.document.rollWeapon(target.dataset.itemId, { situational });
   }
 
   static async #onCreateItem(event, target) {
@@ -317,25 +365,11 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   }
 
   static #onSwitchTab(event, target) {
+    if (this._activeTab === target.dataset.tab) return;
     this._activeTab = target.dataset.tab;
-    this.#applyTabs();
-  }
-
-  #applyTabs() {
-    const root = this.element;
-    if (!root) return;
-    root.querySelectorAll('.tab-content').forEach((el) =>
-      el.classList.toggle('active', el.dataset.tab === this._activeTab));
-    root.querySelectorAll('.sheet-tabs .tab-link').forEach((el) =>
-      el.classList.toggle('active', el.dataset.tab === this._activeTab));
-
-    // Un <prose-mirror> montado dentro de una pestaña oculta (display:none) no llega a
-    // inicializar su editor. Al hacerse visible, si sigue sin editor interno, lo re-conectamos
-    // (clonar + reemplazar re-dispara connectedCallback ahora que es visible).
-    const active = root.querySelector(`.tab-content[data-tab="${this._activeTab}"]`);
-    active?.querySelectorAll('prose-mirror').forEach((pm) => {
-      if (!pm.querySelector('.ProseMirror')) pm.replaceWith(pm.cloneNode(true));
-    });
+    // Re-render: solo se renderiza la pestaña activa, así los editores ProseMirror
+    // siempre se crean visibles (nunca dentro de display:none).
+    this.render();
   }
 }
 

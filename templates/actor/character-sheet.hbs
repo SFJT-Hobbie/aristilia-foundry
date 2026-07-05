@@ -43,16 +43,24 @@
   </header>
 
   <nav class="sheet-tabs">
-    <a class="tab-link" data-action="switchTab" data-tab="main"><i class="fas fa-shield-halved"></i> {{localize 'ARISTILIA.Tab.main'}}</a>
-    <a class="tab-link" data-action="switchTab" data-tab="inventory"><i class="fas fa-box-open"></i> {{localize 'ARISTILIA.Tab.inventory'}}</a>
-    <a class="tab-link" data-action="switchTab" data-tab="skills"><i class="fas fa-scroll"></i> {{localize 'ARISTILIA.Tab.skills'}}</a>
-    <a class="tab-link" data-action="switchTab" data-tab="spells"><i class="fas fa-hat-wizard"></i> {{localize 'ARISTILIA.Tab.spells'}}</a>
-    <a class="tab-link" data-action="switchTab" data-tab="bio"><i class="fas fa-feather"></i> {{localize 'ARISTILIA.Tab.bio'}}</a>
+    <a class="tab-link {{#if (eq activeTab 'main')}}active{{/if}}" data-action="switchTab" data-tab="main"><i class="fas fa-shield-halved"></i> {{localize 'ARISTILIA.Tab.main'}}</a>
+    <a class="tab-link {{#if (eq activeTab 'inventory')}}active{{/if}}" data-action="switchTab" data-tab="inventory"><i class="fas fa-box-open"></i> {{localize 'ARISTILIA.Tab.inventory'}}</a>
+    <a class="tab-link {{#if (eq activeTab 'skills')}}active{{/if}}" data-action="switchTab" data-tab="skills"><i class="fas fa-scroll"></i> {{localize 'ARISTILIA.Tab.skills'}}</a>
+    <a class="tab-link {{#if (eq activeTab 'spells')}}active{{/if}}" data-action="switchTab" data-tab="spells"><i class="fas fa-hat-wizard"></i> {{localize 'ARISTILIA.Tab.spells'}}</a>
+    <a class="tab-link {{#if (eq activeTab 'bio')}}active{{/if}}" data-action="switchTab" data-tab="bio"><i class="fas fa-feather"></i> {{localize 'ARISTILIA.Tab.bio'}}</a>
   </nav>
 
-  {{!-- Pestaña: Ficha --}}
+  {{#if (eq activeTab 'main')}}
   <div class="tab-content" data-tab="main">
     {{> "systems/aristilia/templates/actor/parts/attributes.hbs"}}
+
+    <div class="situational-toggle">
+      <label>
+        <input type="checkbox" data-action="toggleSituational" {{#if situational}}checked{{/if}} />
+        {{localize 'ARISTILIA.Situational.toggle'}}
+      </label>
+      <span class="hint">{{localize 'ARISTILIA.Situational.toggleHint'}}</span>
+    </div>
 
     <section class="combat-block">
       <div class="stat">
@@ -71,7 +79,11 @@
         {{/if}}
       </div>
       <div class="stat"><label>{{localize 'ARISTILIA.BonusToHit'}}</label> <input type="number" name="system.combat.bonusToHit" value="{{system.combat.bonusToHit}}" /></div>
-      <div class="stat"><label>{{localize 'ARISTILIA.BonusToSave'}}</label> <input type="number" name="system.combat.bonusToSave" value="{{system.combat.bonusToSave}}" /></div>
+      <div class="stat rollable-stat">
+        <a class="stat-roll" data-action="rollSave" title="{{localize 'ARISTILIA.Roll.save'}}"><i class="fas fa-dice-d20"></i></a>
+        <label>{{localize 'ARISTILIA.BonusToSave'}}</label>
+        <input type="number" name="system.combat.bonusToSave" value="{{system.combat.bonusToSave}}" />
+      </div>
       <div class="stat"><label>{{localize 'ARISTILIA.MoveClose'}}</label> <b>{{system.movement.close}} ft</b></div>
       <div class="stat"><label>{{localize 'ARISTILIA.MoveOpen'}}</label> <b>{{system.movement.open}} ft</b></div>
       <div class="stat"><label>{{localize 'ARISTILIA.MagicResistance'}}</label> <b>{{system.magicResistance}}%</b></div>
@@ -122,18 +134,21 @@
       </ol>
     </section>
   </div>
+  {{/if}}
 
-  {{!-- Pestaña: Inventario --}}
+  {{#if (eq activeTab 'inventory')}}
   <div class="tab-content" data-tab="inventory">
     {{> "systems/aristilia/templates/actor/parts/inventory-grid.hbs"}}
   </div>
+  {{/if}}
 
-  {{!-- Pestaña: Competencias --}}
+  {{#if (eq activeTab 'skills')}}
   <div class="tab-content" data-tab="skills">
     {{> "systems/aristilia/templates/actor/parts/proficiencies.hbs"}}
   </div>
+  {{/if}}
 
-  {{!-- Pestaña: Hechizos --}}
+  {{#if (eq activeTab 'spells')}}
   <div class="tab-content" data-tab="spells">
     <section class="spells-block">
       <h3>{{localize 'ARISTILIA.Spells'}}
@@ -157,8 +172,9 @@
       </ol>
     </section>
   </div>
+  {{/if}}
 
-  {{!-- Pestaña: Biografía --}}
+  {{#if (eq activeTab 'bio')}}
   <div class="tab-content" data-tab="bio">
     <section class="biography">
       <h3>{{localize 'ARISTILIA.Biography'}}</h3>
@@ -169,5 +185,6 @@
       {{/if}}
     </section>
   </div>
+  {{/if}}
 
 </div>

@@ -10,7 +10,7 @@ export class AristiliaActor extends Actor {
   /**
    * Tirada Target20 basada en un atributo.
    * @param {string} attrKey  clave del atributo (str, dex, ...)
-   * @param {object} [opts]    { bonusToHit, targetAC, flavor }
+   * @param {object} [opts]    { bonusToHit, targetAC, situational, flavor }
    */
   async rollAttribute(attrKey, opts = {}) {
     const attr = this.system.attributes?.[attrKey];
@@ -21,7 +21,19 @@ export class AristiliaActor extends Actor {
       mod,
       bonusToHit: opts.bonusToHit ?? 0,
       targetAC: opts.targetAC ?? 0,
+      situational: opts.situational ?? 0,
       flavor: opts.flavor
+    });
+  }
+
+  /** Tirada de salvación (Target20 con el bono de salvación). */
+  async rollSave(opts = {}) {
+    const bonus = this.system.combat?.bonusToSave ?? this.system.save ?? 0;
+    return rollTarget20({
+      actor: this,
+      label: game.i18n.localize('ARISTILIA.Roll.save'),
+      mod: bonus,
+      situational: opts.situational ?? 0
     });
   }
 
@@ -34,7 +46,7 @@ export class AristiliaActor extends Actor {
   async rollWeapon(itemId, opts = {}) {
     const item = this.items.get(itemId);
     if (!item || item.type !== 'weapon') return null;
-    return rollWeaponAttack({ actor: this, item, targetAC: opts.targetAC ?? 0 });
+    return rollWeaponAttack({ actor: this, item, targetAC: opts.targetAC ?? 0, situational: opts.situational ?? 0 });
   }
 }
 
