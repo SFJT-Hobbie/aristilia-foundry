@@ -26,6 +26,25 @@ ARISTILIA.attributeAbbr = {
   cha: 'ARISTILIA.AttrAbbr.cha'
 };
 
+/**
+ * Iconos curados para el selector de iconos de objetos (buena práctica: los
+ * jugadores eligen de esta grilla en vez de navegar el servidor). Son iconos del
+ * núcleo de Foundry (icons/svg/*), presentes en toda instalación. El GM conserva
+ * el explorador completo. Se pueden ampliar libremente.
+ */
+ARISTILIA.itemIcons = [
+  'icons/svg/sword.svg', 'icons/svg/shield.svg', 'icons/svg/holy-shield.svg', 'icons/svg/book.svg',
+  'icons/svg/chest.svg', 'icons/svg/coins.svg', 'icons/svg/item-bag.svg', 'icons/svg/upgrade.svg',
+  'icons/svg/fire.svg', 'icons/svg/lightning.svg', 'icons/svg/explosion.svg', 'icons/svg/ice-aura.svg',
+  'icons/svg/aura.svg', 'icons/svg/sun.svg', 'icons/svg/light.svg', 'icons/svg/eye.svg',
+  'icons/svg/heal.svg', 'icons/svg/regen.svg', 'icons/svg/poison.svg', 'icons/svg/pill.svg',
+  'icons/svg/blood.svg', 'icons/svg/skull.svg', 'icons/svg/bones.svg', 'icons/svg/terror.svg',
+  'icons/svg/tankard.svg', 'icons/svg/barrel.svg', 'icons/svg/oak.svg', 'icons/svg/pawprint.svg',
+  'icons/svg/wing.svg', 'icons/svg/padlock.svg', 'icons/svg/trap.svg', 'icons/svg/net.svg',
+  'icons/svg/target.svg', 'icons/svg/hazard.svg', 'icons/svg/daze.svg', 'icons/svg/sleep.svg',
+  'icons/svg/statue.svg', 'icons/svg/castle.svg', 'icons/svg/village.svg', 'icons/svg/mystery-man.svg'
+];
+
 /** Clases jugables. */
 ARISTILIA.classes = {
   fighter: 'ARISTILIA.Class.fighter',
