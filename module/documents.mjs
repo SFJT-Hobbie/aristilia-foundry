@@ -44,7 +44,7 @@ export class AristiliaActor extends Actor {
       actor: this,
       label: game.i18n.localize('ARISTILIA.Roll.hit'),
       mod: bonus,
-      targetAC: this.system.combat?.targetAC ?? 0,
+      targetAC: opts.targetAC ?? this.system.combat?.targetAC ?? 0,
       situational: opts.situational ?? 0
     });
   }

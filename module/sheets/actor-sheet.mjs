@@ -266,10 +266,60 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     await this.document.rollSave({ situational });
   }
 
+  /**
+   * Diálogo unificado de ataque: elegir arma (opcional), CA del enemigo y
+   * modificador situacional. Devuelve {weaponId, targetAC, situational} o null.
+   */
+  async #attackDialog(weaponId = null) {
+    const weapons = this.document.items.filter((i) => i.type === 'weapon');
+    const options = [`<option value="">${game.i18n.localize('ARISTILIA.Attack.noWeapon')}</option>`]
+      .concat(weapons.map((w) =>
+        `<option value="${w.id}" ${w.id === weaponId ? 'selected' : ''}>${w.name} (${w.system.damage})</option>`))
+      .join('');
+    const defaultAC = this.document.system.combat?.targetAC ?? 0;
+    const content = `
+      <div class="aristilia-create-dialog">
+        <label class="field">${game.i18n.localize('ARISTILIA.Attack.weapon')}
+          <select name="weaponId">${options}</select>
+        </label>
+        <div class="dims">
+          <label class="field">${game.i18n.localize('ARISTILIA.TargetAC')}
+            <input type="number" name="targetAC" value="${defaultAC}" step="1" />
+          </label>
+          <label class="field">${game.i18n.localize('ARISTILIA.Situational.label')}
+            <input type="number" name="situational" value="0" step="1" />
+          </label>
+        </div>
+      </div>`;
+
+    const data = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize('ARISTILIA.Attack.title'), icon: 'fas fa-dice-d20' },
+      content,
+      classes: ['aristilia', 'dialog'],
+      rejectClose: false,
+      ok: {
+        label: game.i18n.localize('ARISTILIA.Roll.roll'),
+        callback: (ev, button) => new foundry.applications.ux.FormDataExtended(button.form).object
+      }
+    });
+    if (!data) return null;
+    return {
+      weaponId: data.weaponId || null,
+      targetAC: Number(data.targetAC) || 0,
+      situational: Number(data.situational) || 0
+    };
+  }
+
+  /** Ejecuta un ataque a partir del resultado del diálogo. */
+  async #doAttack(res) {
+    if (!res) return;
+    const opts = { targetAC: res.targetAC, situational: res.situational };
+    if (res.weaponId) await this.document.rollWeapon(res.weaponId, opts);
+    else await this.document.rollHit(opts);
+  }
+
   static async #onRollHit(event, target) {
-    const situational = await this.#promptSituational();
-    if (situational === null) return;
-    await this.document.rollHit({ situational });
+    await this.#doAttack(await this.#attackDialog(null));
   }
 
   static async #onRollSkill(event, target) {
@@ -278,9 +328,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   }
 
   static async #onRollWeapon(event, target) {
-    const situational = await this.#promptSituational();
-    if (situational === null) return;
-    await this.document.rollWeapon(target.dataset.itemId, { situational });
+    await this.#doAttack(await this.#attackDialog(target.dataset.itemId));
   }
 
   static async #onCreateItem(event, target) {
