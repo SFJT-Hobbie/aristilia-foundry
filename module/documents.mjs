@@ -37,6 +37,17 @@ export class AristiliaActor extends Actor {
     });
   }
 
+  /** Tirada de golpe genérica (Target20 con el bono para golpear). */
+  async rollHit(opts = {}) {
+    const bonus = this.system.combat?.bonusToHit ?? this.system.bonusToHit ?? 0;
+    return rollTarget20({
+      actor: this,
+      label: game.i18n.localize('ARISTILIA.Roll.hit'),
+      mod: bonus,
+      situational: opts.situational ?? 0
+    });
+  }
+
   /** Tirada d100% de una competencia sin arma. `skill` es el % objetivo. */
   async rollSkill(label, skill) {
     return rollSkillD100({ actor: this, label, skill });

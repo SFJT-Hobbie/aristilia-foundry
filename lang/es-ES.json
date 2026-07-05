@@ -169,6 +169,7 @@
   "ARISTILIA.Roll.attack": "Ataque",
   "ARISTILIA.Roll.damage": "Daño",
   "ARISTILIA.Roll.save": "Salvación",
+  "ARISTILIA.Roll.hit": "Golpe",
   "ARISTILIA.Roll.roll": "Tirar",
   "ARISTILIA.Roll.attackWith": "Ataque con {attr}",
   "ARISTILIA.Situational.toggle": "Mod. situacional",

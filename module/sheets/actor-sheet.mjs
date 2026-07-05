@@ -23,6 +23,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     actions: {
       rollAttribute: BaseActorSheet.#onRollAttribute,
       rollSave: BaseActorSheet.#onRollSave,
+      rollHit: BaseActorSheet.#onRollHit,
       rollSkill: BaseActorSheet.#onRollSkill,
       rollWeapon: BaseActorSheet.#onRollWeapon,
       toggleSituational: BaseActorSheet.#onToggleSituational,
@@ -263,6 +264,12 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const situational = await this.#promptSituational();
     if (situational === null) return;
     await this.document.rollSave({ situational });
+  }
+
+  static async #onRollHit(event, target) {
+    const situational = await this.#promptSituational();
+    if (situational === null) return;
+    await this.document.rollHit({ situational });
   }
 
   static async #onRollSkill(event, target) {

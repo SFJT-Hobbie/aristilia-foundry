@@ -78,7 +78,11 @@
            + {{localize 'ARISTILIA.ACShield'}} <input type="number" name="system.ac.shield" value="{{system.ac.shield}}" />)</small>
         {{/if}}
       </div>
-      <div class="stat"><label>{{localize 'ARISTILIA.BonusToHit'}}</label> <input type="number" name="system.combat.bonusToHit" value="{{system.combat.bonusToHit}}" /></div>
+      <div class="stat rollable-stat">
+        <a class="stat-roll" data-action="rollHit" title="{{localize 'ARISTILIA.Roll.hit'}}"><i class="fas fa-dice-d20"></i></a>
+        <label>{{localize 'ARISTILIA.BonusToHit'}}</label>
+        <input type="number" name="system.combat.bonusToHit" value="{{system.combat.bonusToHit}}" />
+      </div>
       <div class="stat rollable-stat">
         <a class="stat-roll" data-action="rollSave" title="{{localize 'ARISTILIA.Roll.save'}}"><i class="fas fa-dice-d20"></i></a>
         <label>{{localize 'ARISTILIA.BonusToSave'}}</label>
