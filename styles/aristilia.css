@@ -50,20 +50,24 @@
   box-shadow: 0 0 6px rgba(201, 168, 106, 0.4);
 }
 .aristilia-sheet select option { background: #1b1512; }
+/* Editor del helper {{editor}} (contenedor .editor + prose-mirror interno). */
+.aristilia-sheet .editor,
+.aristilia-sheet prose-mirror {
+  position: relative;
+  display: block;
+  min-height: 150px;
+  border: 1px solid var(--ar-border);
+  border-radius: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.22);
+}
+.aristilia-sheet .editor .editor-content { min-height: 130px; }
 .aristilia-sheet .editor-readonly {
   border: 1px solid var(--ar-border);
   border-radius: 6px;
   padding: 6px;
   min-height: 60px;
   background: rgba(0, 0, 0, 0.2);
-}
-.aristilia-sheet prose-mirror {
-  display: block;
-  min-height: 120px;
-  border: 1px solid var(--ar-border);
-  border-radius: 6px;
-  padding: 6px;
-  background: rgba(0, 0, 0, 0.25);
 }
 
 /* ---------- Cabecera ---------- */

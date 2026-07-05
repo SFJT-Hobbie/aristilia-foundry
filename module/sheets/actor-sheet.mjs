@@ -98,6 +98,10 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   // Debe coincidir con styles/aristilia.css
   static GRID = { cell: 40, gap: 2, pad: 4 };
 
+  // El elemento raíz de la app es ESTABLE entre re-renders; los listeners a nivel
+  // raíz deben adjuntarse una sola vez para no acumularse (parpadeo creciente).
+  #dndBound = false;
+
   /** @override — engancha listeners tras cada render. */
   _onRender(context, options) {
     super._onRender(context, options);
@@ -105,14 +109,21 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const root = this.element;
     if (!root || !this.isEditable) return;
 
+    // Listeners por-elemento: el DOM interno se recrea en cada render, así que
+    // estos elementos son nuevos y no acumulan handlers.
     root.querySelectorAll('.inv-draggable').forEach((el) => {
       el.addEventListener('dragstart', this.#onDragStart.bind(this));
     });
     root.querySelectorAll('.grid-item').forEach((el) => {
       el.addEventListener('dblclick', this.#onGridUnplace.bind(this));
     });
-    root.addEventListener('dragover', (ev) => ev.preventDefault());
-    root.addEventListener('drop', this.#onDrop.bind(this));
+
+    // Listeners a nivel raíz: una sola vez.
+    if (!this.#dndBound) {
+      root.addEventListener('dragover', (ev) => ev.preventDefault());
+      root.addEventListener('drop', this.#onDrop.bind(this));
+      this.#dndBound = true;
+    }
   }
 
   #onDragStart(event) {
@@ -220,52 +231,12 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static async #onCreateItem(event, target) {
     const type = target.dataset.type;
     if (type === 'proficiency') return BaseActorSheet.#onCreateProficiency.call(this);
-    const sized = ['weapon', 'armor', 'shield', 'gear'].includes(type);
     const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
-    const defName = game.i18n.format('ARISTILIA.NewItem', { type: typeLabel });
-    const cols = this.document.system.inventory?.cols ?? 5;
-    const rows = this.document.system.inventory?.rows ?? 5;
-
-    const content = `
-      <div class="aristilia-create-dialog">
-        <label class="field">${game.i18n.localize('ARISTILIA.Name')}
-          <input type="text" name="name" value="${defName}" autofocus />
-        </label>
-        ${sized ? `
-        <div class="dims">
-          <label class="field">${game.i18n.localize('ARISTILIA.Item.width')}
-            <input type="number" name="w" value="1" min="1" max="${cols}" />
-          </label>
-          <label class="field">${game.i18n.localize('ARISTILIA.Item.height')}
-            <input type="number" name="h" value="1" min="1" max="${rows}" />
-          </label>
-        </div>
-        <p class="hint">${game.i18n.localize('ARISTILIA.Item.sizeHint')}</p>` : ''}
-      </div>`;
-
-    const data = await foundry.applications.api.DialogV2.prompt({
-      window: { title: defName, icon: 'fas fa-plus' },
-      content,
-      classes: ['aristilia', 'dialog'],
-      rejectClose: false,
-      ok: {
-        label: game.i18n.localize('ARISTILIA.Add'),
-        callback: (ev, button) => new foundry.applications.ux.FormDataExtended(button.form).object
-      }
-    });
-    if (!data) return;
-
-    const itemData = { name: (data.name ?? '').trim() || typeLabel, type };
-    if (sized) {
-      itemData.system = {
-        size: {
-          w: Math.min(cols, Math.max(1, Number(data.w) || 1)),
-          h: Math.min(rows, Math.max(1, Number(data.h) || 1))
-        }
-      };
-    }
-    // Un solo popup: creamos el item ya configurado, sin abrir su ficha.
-    await this.document.createEmbeddedDocuments('Item', [itemData]);
+    const name = game.i18n.format('ARISTILIA.NewItem', { type: typeLabel });
+    // Un único popup: crear y abrir la ficha del item (el mismo que "editar"),
+    // donde se ajustan nombre, tamaño (ancho×alto) y demás.
+    const [created] = await this.document.createEmbeddedDocuments('Item', [{ name, type }]);
+    created?.sheet.render(true);
   }
 
   static async #onEditItem(event, target) {
