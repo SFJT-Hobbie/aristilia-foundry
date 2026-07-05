@@ -98,18 +98,6 @@
       <div class="stat"><label>{{localize 'ARISTILIA.MagicResistance'}}</label> <b>{{system.magicResistance}}%</b></div>
     </section>
 
-    <section class="resources-block">
-      <div class="currency">
-        <span class="cur-label">{{localize 'ARISTILIA.Currency.title'}}</span>
-        <label>{{localize 'ARISTILIA.Currency.gold'}} <input type="number" name="system.currency.gold" value="{{system.currency.gold}}" min="0" /></label>
-        <label>{{localize 'ARISTILIA.Currency.silver'}} <input type="number" name="system.currency.silver" value="{{system.currency.silver}}" min="0" /></label>
-        <label>{{localize 'ARISTILIA.Currency.copper'}} <input type="number" name="system.currency.copper" value="{{system.currency.copper}}" min="0" /></label>
-      </div>
-      <label class="languages">{{localize 'ARISTILIA.Languages'}}
-        <input type="text" name="system.languages" value="{{system.languages}}" placeholder="Común, Élfico…" />
-      </label>
-    </section>
-
     <section class="weapons-block">
       <h3>{{localize 'ARISTILIA.Weapons'}}
         <a class="item-create" data-action="createItem" data-type="weapon" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
@@ -162,12 +150,25 @@
 
   {{#if (eq activeTab 'inventory')}}
   <div class="tab-content" data-tab="inventory">
+    <section class="resources-block">
+      <div class="currency">
+        <span class="cur-label">{{localize 'ARISTILIA.Currency.title'}}</span>
+        <label>{{localize 'ARISTILIA.Currency.gold'}} <input type="number" name="system.currency.gold" value="{{system.currency.gold}}" min="0" /></label>
+        <label>{{localize 'ARISTILIA.Currency.silver'}} <input type="number" name="system.currency.silver" value="{{system.currency.silver}}" min="0" /></label>
+        <label>{{localize 'ARISTILIA.Currency.copper'}} <input type="number" name="system.currency.copper" value="{{system.currency.copper}}" min="0" /></label>
+      </div>
+    </section>
     {{> "systems/aristilia/templates/actor/parts/inventory-grid.hbs"}}
   </div>
   {{/if}}
 
   {{#if (eq activeTab 'skills')}}
   <div class="tab-content" data-tab="skills">
+    <section class="resources-block">
+      <label class="languages">{{localize 'ARISTILIA.Languages'}}
+        <input type="text" name="system.languages" value="{{system.languages}}" placeholder="Común, Élfico…" />
+      </label>
+    </section>
     {{> "systems/aristilia/templates/actor/parts/proficiencies.hbs"}}
   </div>
   {{/if}}
