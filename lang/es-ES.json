@@ -26,6 +26,7 @@
   "ARISTILIA.ACArmor": "Armadura",
   "ARISTILIA.ACShield": "Escudo",
   "ARISTILIA.BonusToHit": "Bono para Golpear",
+  "ARISTILIA.TargetAC": "CA enemigo",
   "ARISTILIA.BonusToSave": "Bono a Salvación",
   "ARISTILIA.MoveClose": "Mov. Espacios Cerrados",
   "ARISTILIA.MoveOpen": "Mov. Espacios Abiertos",

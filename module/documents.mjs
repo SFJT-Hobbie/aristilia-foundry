@@ -37,13 +37,14 @@ export class AristiliaActor extends Actor {
     });
   }
 
-  /** Tirada de golpe genérica (Target20 con el bono para golpear). */
+  /** Tirada de golpe genérica: 1d20 + bono para golpear + CA del enemigo + situacional. */
   async rollHit(opts = {}) {
     const bonus = this.system.combat?.bonusToHit ?? this.system.bonusToHit ?? 0;
     return rollTarget20({
       actor: this,
       label: game.i18n.localize('ARISTILIA.Roll.hit'),
       mod: bonus,
+      targetAC: this.system.combat?.targetAC ?? 0,
       situational: opts.situational ?? 0
     });
   }
@@ -57,7 +58,7 @@ export class AristiliaActor extends Actor {
   async rollWeapon(itemId, opts = {}) {
     const item = this.items.get(itemId);
     if (!item || item.type !== 'weapon') return null;
-    return rollWeaponAttack({ actor: this, item, targetAC: opts.targetAC ?? 0, situational: opts.situational ?? 0 });
+    return rollWeaponAttack({ actor: this, item, targetAC: opts.targetAC ?? this.system.combat?.targetAC ?? 0, situational: opts.situational ?? 0 });
   }
 }
 

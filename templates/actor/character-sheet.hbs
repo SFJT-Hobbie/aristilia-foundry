@@ -81,7 +81,9 @@
       <div class="stat rollable-stat">
         <a class="stat-roll" data-action="rollHit" title="{{localize 'ARISTILIA.Roll.hit'}}"><i class="fas fa-dice-d20"></i></a>
         <label>{{localize 'ARISTILIA.BonusToHit'}}</label>
-        <input type="number" name="system.combat.bonusToHit" value="{{system.combat.bonusToHit}}" />
+        <input type="number" name="system.combat.bonusToHit" value="{{system.combat.bonusToHit}}" title="{{localize 'ARISTILIA.BonusToHit'}}" />
+        <label class="sub">{{localize 'ARISTILIA.TargetAC'}}</label>
+        <input type="number" name="system.combat.targetAC" value="{{system.combat.targetAC}}" title="{{localize 'ARISTILIA.TargetAC'}}" />
       </div>
       <div class="stat rollable-stat">
         <a class="stat-roll" data-action="rollSave" title="{{localize 'ARISTILIA.Roll.save'}}"><i class="fas fa-dice-d20"></i></a>

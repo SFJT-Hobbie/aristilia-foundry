@@ -191,6 +191,7 @@
   order: -1;
 }
 .aristilia-sheet .rollable-stat .stat-roll:hover { color: var(--ar-gold); text-shadow: 0 0 6px var(--ar-gold); }
+.aristilia-sheet .combat-block .stat label.sub { font-size: 0.9em; opacity: 0.85; margin-left: 4px; }
 
 /* ---------- Badges ---------- */
 .aristilia-sheet .badge {

@@ -57,7 +57,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       }),
       combat: new fields.SchemaField({
         bonusToHit: new fields.NumberField({ integer: true, initial: 0 }),
-        bonusToSave: new fields.NumberField({ integer: true, initial: 0 })
+        bonusToSave: new fields.NumberField({ integer: true, initial: 0 }),
+        targetAC: new fields.NumberField({ integer: true, initial: 0 }) // CA del enemigo actual
       }),
       proficiencies: new fields.SchemaField({
         weapon: new fields.ArrayField(new fields.StringField()),
