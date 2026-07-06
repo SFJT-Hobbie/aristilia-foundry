@@ -471,7 +471,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
             name: e.name,
             school: foundry.utils.getProperty(e, 'system.school') ?? '',
             branch: foundry.utils.getProperty(e, 'system.branch') ?? '',
-            level: foundry.utils.getProperty(e, 'system.level') ?? 0
+            level: foundry.utils.getProperty(e, 'system.level') ?? 0,
+            core: !!foundry.utils.getProperty(e, 'system.core')
           });
         }
       }
@@ -491,6 +492,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           <option value="astral">Astral</option>
           <option value="natural">Natural</option>
         </select>
+        <label class="sp-core"><input type="checkbox" class="sp-core-only" checked /> ${game.i18n.localize('ARISTILIA.Spell.coreOnly')}</label>
       </div>
       <div class="sp-results"><p class="hint">${game.i18n.localize('ARISTILIA.Spell.typeToSearch')}</p></div>
     </div>`;
@@ -508,18 +510,21 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         const el = dialog.element;
         const search = el.querySelector('.sp-search');
         const school = el.querySelector('.sp-school');
+        const coreOnly = el.querySelector('.sp-core-only');
         const results = el.querySelector('.sp-results');
         const apply = () => {
           const q = search.value.trim().toLowerCase();
           const sc = school.value;
-          if (!q && !sc) { results.innerHTML = `<p class="hint">${game.i18n.localize('ARISTILIA.Spell.typeToSearch')}</p>`; return; }
+          const onlyCore = coreOnly.checked;
           let list = cache;
+          if (onlyCore) list = list.filter((e) => e.core);
           if (sc) list = list.filter((e) => e.school === sc);
           if (q) list = list.filter((e) => e.name.toLowerCase().includes(q));
+          if (!q && !sc && !onlyCore) { results.innerHTML = `<p class="hint">${game.i18n.localize('ARISTILIA.Spell.typeToSearch')}</p>`; return; }
           results.innerHTML = list.length
-            ? list.slice(0, 40).map((e) =>
-              `<div class="sp-row" data-uuid="${e.uuid}"><span class="sp-name">${foundry.utils.escapeHTML(e.name)}</span>` +
-              `<span class="sp-meta">${foundry.utils.escapeHTML(e.branch || e.school)} · N${e.level}</span>` +
+            ? list.slice(0, 60).map((e) =>
+              `<div class="sp-row${e.core ? '' : ' ext'}" data-uuid="${e.uuid}"><span class="sp-name">${foundry.utils.escapeHTML(e.name)}</span>` +
+              `<span class="sp-meta">${foundry.utils.escapeHTML(e.branch || e.school)} · N${e.level}${e.core ? '' : ' · adaptar'}</span>` +
               `<a class="sp-add" title="${game.i18n.localize('ARISTILIA.Add')}"><i class="fas fa-plus"></i></a></div>`).join('')
             : `<p class="hint">${game.i18n.localize('ARISTILIA.Spell.noResults')}</p>`;
           results.querySelectorAll('.sp-add').forEach((btn) => {
@@ -532,6 +537,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         };
         search.addEventListener('input', apply);
         school.addEventListener('change', apply);
+        coreOnly.addEventListener('change', apply);
+        apply(); // vista inicial: núcleo OSR
       }
     });
 

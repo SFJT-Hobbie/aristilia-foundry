@@ -662,6 +662,9 @@
 .aristilia-create-dialog .sp-meta { font-size: 0.8em; color: #6b5638; font-variant: small-caps; }
 .aristilia-create-dialog .sp-add { cursor: pointer; color: #7a2d22; }
 .aristilia-create-dialog .sp-add:hover { color: #b8912f; text-shadow: 0 0 6px rgba(156, 123, 58, 0.7); }
+.aristilia-create-dialog.spell-picker .sp-core { display: inline-flex; align-items: center; gap: 4px; font-size: 0.82em; font-variant: small-caps; white-space: nowrap; }
+.aristilia-create-dialog .sp-row.ext .sp-name { opacity: 0.75; }
+.aristilia-create-dialog .sp-row.ext .sp-meta { color: #a9832f; }
 
 /* ===========================================================
    Tarjetas de chat (acotadas a .aristilia.chat-card) — pequeño pergamino

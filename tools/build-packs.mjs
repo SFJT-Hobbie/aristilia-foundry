@@ -15,9 +15,10 @@ import { dirname, join, resolve } from 'node:path';
 import { WEAPONS, ARMOR, RACES, CLASSES } from './packs-data.mjs';
 import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
+import { OSR_SPELLS } from './osr-spells.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.22.1';
+const SYSTEM_VERSION = '0.23.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -448,42 +449,54 @@ function buildSpells() {
     .filter((s) => (s.level ?? 0) <= 6);
   const docs = [];
   const SCHOOL_LABEL = { astral: 'Astral', natural: 'Natural', voiceForm: 'Voz y Forma' };
-  const SCHOOL_ORDER = ['astral', 'natural', 'voiceForm'];
+  const SET_LABEL = { core: 'Núcleo OSR', ext: 'Extendido (adaptar)' };
 
-  // Carpetas: escuela (Astral/Natural) con subcarpetas por rama (Gris/Blanca/Negra, Agua/…).
-  const schoolFolder = {};
-  [...new Set(src.map((s) => s.school))]
-    .sort((a, b) => SCHOOL_ORDER.indexOf(a) - SCHOOL_ORDER.indexOf(b))
-    .forEach((sc, i) => {
-      schoolFolder[sc] = makeId(`spellfolder:${sc}`);
-      docs.push(makeFolder({ seed: `spellfolder:${sc}`, name: SCHOOL_LABEL[sc] ?? sc, type: 'Item', sort: (i + 1) * 100000 }));
-    });
-  const branchFolder = {};
-  [...new Set(src.map((s) => `${s.school}::${s.branch}`))].sort().forEach((key, i) => {
-    const [sc, br] = key.split('::');
-    branchFolder[key] = makeId(`spellfolder:${sc}:${br}`);
-    docs.push(makeFolder({ seed: `spellfolder:${sc}:${br}`, name: br || '(sin rama)', type: 'Item', parent: schoolFolder[sc], sort: (i + 1) * 1000 }));
+  // Núcleo OSR: hechizos cuyo nombre existe en el canon AD&D/B-X (ya balanceados).
+  const normName = (n) => String(n).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+  const OSRset = new Set(OSR_SPELLS.map(normName));
+  const isCore = (name) => OSRset.has(normName(name));
+  const setOf = (s) => (isCore(s.name) ? 'core' : 'ext');
+
+  // Carpetas anidadas: set (Núcleo OSR / Extendido) > escuela > rama.
+  const setFolder = {}; const schoolFolder = {}; const branchFolder = {};
+  for (const set of ['core', 'ext']) {
+    setFolder[set] = makeId(`spellfolder:${set}`);
+    docs.push(makeFolder({ seed: `spellfolder:${set}`, name: SET_LABEL[set], type: 'Item', sort: set === 'core' ? 100000 : 200000 }));
+  }
+  [...new Set(src.map((s) => `${setOf(s)}::${s.school}`))].sort().forEach((key, i) => {
+    const [set, sc] = key.split('::');
+    schoolFolder[key] = makeId(`spellfolder:${set}:${sc}`);
+    docs.push(makeFolder({ seed: `spellfolder:${set}:${sc}`, name: SCHOOL_LABEL[sc] ?? sc, type: 'Item', parent: setFolder[set], sort: (i + 1) * 10000 }));
+  });
+  [...new Set(src.map((s) => `${setOf(s)}::${s.school}::${s.branch}`))].sort().forEach((key, i) => {
+    const [set, sc, br] = key.split('::');
+    branchFolder[key] = makeId(`spellfolder:${set}:${sc}:${br}`);
+    docs.push(makeFolder({ seed: `spellfolder:${set}:${sc}:${br}`, name: br || '(sin rama)', type: 'Item', parent: schoolFolder[`${set}::${sc}`], sort: (i + 1) * 100 }));
   });
 
   for (const s of src) {
-    // NO se incluye ninguna metadata de Pathfinder (pfSchool/pfSub/pfDescriptor/source).
+    const core = isCore(s.name);
+    const set = core ? 'core' : 'ext';
+    // NO se incluye ninguna metadata de Pathfinder.
     const parts = [];
     if (s.summary) parts.push(`<p>${esc(osrify(s.summary))}</p>`);
     const meta = [];
     if (s.branch) meta.push(`<strong>Rama:</strong> ${esc(s.branch)}`);
     if (s.tags?.length) meta.push(`<strong>Tags:</strong> ${esc(s.tags.join(', '))}`);
     if (meta.length) parts.push(`<p>${meta.join(' · ')}</p>`);
+    if (!core) parts.push('<p><em>Extendido: adaptar el balance a OSR antes de usar.</em></p>');
 
     docs.push(makeItem({
       seed: `spell:${s.school}:${s.branch}:${s.name}`,
       name: s.name,
       type: 'spell',
-      folder: branchFolder[`${s.school}::${s.branch}`],
+      folder: branchFolder[`${set}::${s.school}::${s.branch}`],
       system: {
         description: parts.join('\n'),
         school: s.school,
         branch: s.branch,
         tags: (s.tags ?? []).join(', '),
+        core,
         level: s.level,
         cost: '', castingTime: '', range: '', duration: ''
       }

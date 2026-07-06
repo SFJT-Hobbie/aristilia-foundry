@@ -194,6 +194,7 @@
   "ARISTILIA.Spell.typeToSearch": "Escribí un nombre o elegí una escuela para buscar.",
   "ARISTILIA.Spell.noResults": "Sin resultados.",
   "ARISTILIA.Spell.custom": "Crear personalizado",
+  "ARISTILIA.Spell.coreOnly": "Solo núcleo OSR",
 
   "ARISTILIA.Prof.kind": "Tipo",
   "ARISTILIA.Prof.attribute": "Atributo",

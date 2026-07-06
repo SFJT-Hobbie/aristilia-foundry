@@ -44,7 +44,7 @@ Hooks.once('init', function () {
   CONFIG.Actor.dataModels.npc = models.NpcData;
 
   // Campos extra en el índice de compendios de Item (para el selector de hechizos)
-  CONFIG.Item.compendiumIndexFields = ['system.school', 'system.branch', 'system.level'];
+  CONFIG.Item.compendiumIndexFields = ['system.school', 'system.branch', 'system.level', 'system.core'];
 
   // DataModels de Item
   CONFIG.Item.dataModels.weapon = models.WeaponData;
