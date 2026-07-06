@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.22.0';
+const SYSTEM_VERSION = '0.22.1';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -425,8 +425,27 @@ function buildClasses() {
   }));
 }
 
+/** Elimina PF-ismos del texto (Pathfinder/D&D3.x) hacia terminología OSR/Aristilia. */
+function osrify(s) {
+  return String(s || '')
+    .replace(/ranged touch attack/gi, 'ranged attack')
+    .replace(/melee touch attack/gi, 'melee attack')
+    .replace(/\btouch attack\b/gi, 'attack')
+    .replace(/\b(Reflex|Fortitude|Will)\s+(?:half|negates|partial)\b/gi, 'save')
+    .replace(/\b(Reflex|Fortitude|Will)\s+save\b/gi, 'save')
+    .replace(/\b(Reflex|Fortitude|Will)\b/gi, 'save')
+    .replace(/\bspell resistance\b/gi, 'magic resistance')
+    .replace(/\bSR\b/g, 'MR')
+    .replace(/\bcaster level\b/gi, 'level')
+    .replace(/\bCM[BD]\b/g, 'maneuver')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function buildSpells() {
-  const src = JSON.parse(readFileSync(join(root, 'tools', 'spell-source.json'), 'utf8'));
+  // Solo niveles 0-6: en Aristilia no existen hechizos >6 (serían rituales/objetos mágicos/lore).
+  const src = JSON.parse(readFileSync(join(root, 'tools', 'spell-source.json'), 'utf8'))
+    .filter((s) => (s.level ?? 0) <= 6);
   const docs = [];
   const SCHOOL_LABEL = { astral: 'Astral', natural: 'Natural', voiceForm: 'Voz y Forma' };
   const SCHOOL_ORDER = ['astral', 'natural', 'voiceForm'];
@@ -447,14 +466,12 @@ function buildSpells() {
   });
 
   for (const s of src) {
+    // NO se incluye ninguna metadata de Pathfinder (pfSchool/pfSub/pfDescriptor/source).
     const parts = [];
-    if (s.summary) parts.push(`<p>${esc(s.summary)}</p>`);
+    if (s.summary) parts.push(`<p>${esc(osrify(s.summary))}</p>`);
     const meta = [];
     if (s.branch) meta.push(`<strong>Rama:</strong> ${esc(s.branch)}`);
     if (s.tags?.length) meta.push(`<strong>Tags:</strong> ${esc(s.tags.join(', '))}`);
-    const pf = [s.pfSchool, s.pfSub, s.pfDescriptor].filter(Boolean).join(' / ');
-    if (pf) meta.push(`<em>PF: ${esc(pf)}</em>`);
-    if (s.source) meta.push(`<em>Fuente: ${esc(s.source)}</em>`);
     if (meta.length) parts.push(`<p>${meta.join(' · ')}</p>`);
 
     docs.push(makeItem({
