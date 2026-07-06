@@ -51,6 +51,7 @@
   "ARISTILIA.Inventory.placedHint": "Colocado en la rejilla de inventario",
   "ARISTILIA.Inventory.unplace": "Quitar de la rejilla",
   "ARISTILIA.Inventory.place": "Colocar en la rejilla",
+  "ARISTILIA.Inventory.search": "Buscar objeto (inventario y compendios)…",
   "ARISTILIA.Inventory.noRoom": "No hay espacio libre en la rejilla.",
   "ARISTILIA.Container.label": "Contenedor",
   "ARISTILIA.Container.wear": "Equipar (abrir rejilla)",

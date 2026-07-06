@@ -15,8 +15,12 @@
     </div>
   {{/each}}
 
-  <h4 class="backpack-title">{{localize 'ARISTILIA.Inventory.items'}}</h4>
-  <ol class="items-list inventory-list">
+  <div class="inv-toolbar">
+    <h4 class="backpack-title">{{localize 'ARISTILIA.Inventory.items'}}</h4>
+    <input type="search" class="inv-search" placeholder="{{localize 'ARISTILIA.Inventory.search'}}" />
+  </div>
+  <div class="inv-search-results" hidden></div>
+  <ol class="items-list inventory-list two-col">
     {{#each grid.all as |entry|}}
       <li class="item {{#unless entry.placed}}inv-draggable{{/unless}}" data-item-id="{{entry.item.id}}" {{#unless entry.placed}}draggable="true"{{/unless}}>
         <img class="item-icon" src="{{entry.item.img}}" alt="{{entry.item.name}}" />
