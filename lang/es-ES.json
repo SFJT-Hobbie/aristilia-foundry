@@ -217,6 +217,7 @@
   "ARISTILIA.Attack.title": "Ataque",
   "ARISTILIA.Attack.weapon": "Arma",
   "ARISTILIA.Attack.noWeapon": "Sin arma (solo bono para golpear)",
+  "ARISTILIA.Attack.targetInfo": "Objetivo: {name} — CA {ac} (autocompletada)",
   "ARISTILIA.Situational.toggle": "Mod. situacional",
   "ARISTILIA.Situational.toggleHint": "Si está marcado, las tiradas de atributo y salvación te pedirán un modificador (los ataques ya lo incluyen en su diálogo).",
   "ARISTILIA.Situational.title": "Modificador situacional",

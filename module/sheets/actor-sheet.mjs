@@ -500,9 +500,19 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     await this.document.rollSave({ situational });
   }
 
+  /** CA del objetivo actualmente marcado (game.user.targets), o null si no hay. */
+  static #targetInfo() {
+    const token = Array.from(game.user?.targets ?? [])[0];
+    const actor = token?.actor;
+    if (!actor) return null;
+    const ac = actor.type === 'npc' ? (actor.system.ac ?? 0) : (actor.system?.ac?.value ?? 0);
+    return { name: actor.name, ac: Number(ac) || 0 };
+  }
+
   /**
    * Diálogo unificado de ataque: elegir arma (opcional), CA del enemigo y
    * modificador situacional. Devuelve {weaponId, targetAC, situational} o null.
+   * Si hay un objetivo marcado, la CA se autocompleta con la del objetivo.
    */
   async #attackDialog(weaponId = null) {
     const weapons = this.document.items.filter((i) => i.type === 'weapon');
@@ -510,9 +520,15 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       .concat(weapons.map((w) =>
         `<option value="${w.id}" ${w.id === weaponId ? 'selected' : ''}>${w.name} (${w.system.damage})</option>`))
       .join('');
-    const defaultAC = this.document.system.combat?.targetAC ?? 0;
+    // Si hay un objetivo marcado (game.user.targets), usamos su CA automáticamente.
+    const tgt = BaseActorSheet.#targetInfo();
+    const defaultAC = tgt ? tgt.ac : (this.document.system.combat?.targetAC ?? 0);
+    const tgtNote = tgt
+      ? `<p class="hint"><i class="fas fa-crosshairs"></i> ${game.i18n.format('ARISTILIA.Attack.targetInfo', { name: tgt.name, ac: tgt.ac })}</p>`
+      : '';
     const content = `
       <div class="aristilia-create-dialog">
+        ${tgtNote}
         <label class="field">${game.i18n.localize('ARISTILIA.Attack.weapon')}
           <select name="weaponId">${options}</select>
         </label>
