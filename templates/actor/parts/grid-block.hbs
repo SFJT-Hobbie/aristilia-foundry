@@ -1,6 +1,6 @@
 {{! Rejilla reutilizable. Contexto = un objeto de rejilla (principal o de mochila). }}
 <div class="inventory-grid" data-container-id="{{containerId}}" style="width: {{widthPx}}px; height: {{heightPx}}px;">
-  <div class="grid-bg" style="grid-template-columns: repeat({{cols}}, 40px); grid-auto-rows: 40px;">
+  <div class="grid-bg" style="grid-template-columns: repeat({{cols}}, {{cellPx}}px); grid-auto-rows: {{cellPx}}px;">
     {{#each (aristiliaRange cells) as |cell|}}
       <div class="grid-cell"></div>
     {{/each}}

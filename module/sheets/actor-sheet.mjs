@@ -34,6 +34,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       toggleEquip: BaseActorSheet.#onToggleEquip,
       switchTab: BaseActorSheet.#onSwitchTab,
       unplaceItem: BaseActorSheet.#onUnplaceItem,
+      placeItem: BaseActorSheet.#onPlaceItem,
       viewContainer: BaseActorSheet.#onViewContainer
     }
   };
@@ -104,7 +105,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const stride = cell + gap;
     const isPlaced = (i) => Number.isInteger(i.system.slot?.x) && Number.isInteger(i.system.slot?.y);
     return {
-      cols, rows, containerId,
+      cols, rows, containerId, cellPx: cell,
       cells: cols * rows,
       widthPx: pad * 2 + cols * cell + (cols - 1) * gap,
       heightPx: pad * 2 + rows * cell + (rows - 1) * gap,
@@ -133,8 +134,9 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   /* ---------- Grid de inventario (drag & drop) ---------- */
 
-  // Debe coincidir con styles/aristilia.css
-  static GRID = { cell: 40, gap: 2, pad: 4 };
+  // Tamaño de celda de la rejilla (px). widthPx/positions se derivan de aquí y el
+  // template usa cellPx, así que cambiar 'cell' reescala todo de forma consistente.
+  static GRID = { cell: 52, gap: 2, pad: 4 };
 
   // Controlador para re-enganchar los listeners de DnD en CADA render. Al abortar
   // el set anterior, nunca se acumulan (evita el parpadeo creciente) y siempre
@@ -327,6 +329,29 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static async #onUnplaceItem(event, target) {
     const item = this.document.items.get(target.dataset.itemId);
     if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null, 'system.containerId': '' });
+  }
+
+  /** Coloca el objeto en la primera celda libre de la rejilla principal (alternativa al arrastre). */
+  static async #onPlaceItem(event, target) {
+    const item = this.document.items.get(target.dataset.itemId);
+    if (!item) return;
+    const cols = this.document.system.inventory?.cols ?? 5;
+    const rows = this.document.system.inventory?.rows ?? 5;
+    const w = item.system.size?.w ?? 1;
+    const h = item.system.size?.h ?? 1;
+    const cell = this.#firstFreeCell(w, h, cols, rows, '', item.id);
+    if (!cell) { ui.notifications.warn(game.i18n.localize('ARISTILIA.Inventory.noRoom')); return; }
+    await item.update({ 'system.slot.x': cell.x, 'system.slot.y': cell.y, 'system.containerId': '' });
+  }
+
+  /** Primera celda (x,y) donde cabe un objeto w×h sin colisión, o null si no hay hueco. */
+  #firstFreeCell(w, h, cols, rows, containerId, ignoreId) {
+    for (let y = 0; y <= rows - h; y++) {
+      for (let x = 0; x <= cols - w; x++) {
+        if (!this.#gridCollision(x, y, w, h, ignoreId, containerId)) return { x, y };
+      }
+    }
+    return null;
   }
 
   /** Pop-up para ver/retirar el contenido de una mochila (equipada o guardada). */
