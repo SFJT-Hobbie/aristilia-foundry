@@ -158,8 +158,46 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     root.querySelectorAll('.grid-item').forEach((el) => {
       el.addEventListener('dblclick', this.#onGridUnplace.bind(this), { signal });
     });
-    root.addEventListener('dragover', (ev) => ev.preventDefault(), { signal });
+    this.#stopAutoScroll();
+    root.addEventListener('dragover', this.#onDragOver.bind(this), { signal });
     root.addEventListener('drop', this.#onDrop.bind(this), { signal });
+    root.addEventListener('dragend', () => this.#stopAutoScroll(), { signal });
+  }
+
+  /* ---------- Auto-scroll durante el arrastre ---------- */
+  // El drag-and-drop HTML5 no auto-scrollea: si el inventario es largo y la rejilla
+  // queda fuera de vista, sin esto no se podría soltar allí. Al acercar el puntero a
+  // un borde del panel scrolleable, se desplaza solo con un bucle rAF.
+  #autoScroll = { dir: 0, raf: 0, el: null };
+
+  #scrollEl() {
+    return this.element?.querySelector('.aristilia-sheet') ?? this.element;
+  }
+
+  #onDragOver(event) {
+    event.preventDefault();
+    const sc = this.#scrollEl();
+    if (!sc) return;
+    const rect = sc.getBoundingClientRect();
+    const margin = 50;
+    let dir = 0;
+    if (event.clientY < rect.top + margin) dir = -1;
+    else if (event.clientY > rect.bottom - margin) dir = 1;
+    this.#autoScroll.dir = dir;
+    this.#autoScroll.el = sc;
+    if (dir && !this.#autoScroll.raf) {
+      const step = () => {
+        if (!this.#autoScroll.dir) { this.#autoScroll.raf = 0; return; }
+        this.#autoScroll.el.scrollTop += this.#autoScroll.dir * 12;
+        this.#autoScroll.raf = requestAnimationFrame(step);
+      };
+      this.#autoScroll.raf = requestAnimationFrame(step);
+    }
+  }
+
+  #stopAutoScroll() {
+    this.#autoScroll.dir = 0;
+    if (this.#autoScroll.raf) { cancelAnimationFrame(this.#autoScroll.raf); this.#autoScroll.raf = 0; }
   }
 
   #onDragStart(event) {
@@ -173,6 +211,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   async #onDrop(event) {
     event.preventDefault();
+    this.#stopAutoScroll();
     let data;
     try { data = JSON.parse(event.dataTransfer.getData('text/plain')); } catch { return; }
     const overGrid = event.target.closest?.('.inventory-grid');
