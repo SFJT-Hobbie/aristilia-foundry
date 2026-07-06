@@ -12,12 +12,12 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import { WEAPONS, ARMOR, SPELLS, RACES, CLASSES } from './packs-data.mjs';
+import { WEAPONS, ARMOR, GEAR, SPELLS, RACES, CLASSES } from './packs-data.mjs';
 import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.14.0';
+const SYSTEM_VERSION = '0.15.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -48,7 +48,7 @@ const MONSTER_ICONS = {
 };
 const MONSTER_ICON_DEFAULT = 'icons/svg/terror.svg';
 
-function makeItem({ seed, name, type, system }) {
+function makeItem({ seed, name, type, system, folder = null }) {
   const _id = makeId(seed);
   return {
     _id,
@@ -58,7 +58,7 @@ function makeItem({ seed, name, type, system }) {
     img: ICONS[type] ?? 'icons/svg/item-bag.svg',
     system,
     effects: [],
-    folder: null,
+    folder,
     sort: 0,
     ownership: { default: 0 },
     flags: {},
@@ -277,6 +277,13 @@ function buildMonsters() {
 
 function buildGear() {
   const docs = [];
+  const fW = makeId('gearfolder:weapons');
+  const fA = makeId('gearfolder:armor');
+  const fG = makeId('gearfolder:gear');
+  docs.push(makeFolder({ seed: 'gearfolder:weapons', name: 'Armas', type: 'Item', sort: 100000 }));
+  docs.push(makeFolder({ seed: 'gearfolder:armor', name: 'Armaduras y Escudos', type: 'Item', sort: 200000 }));
+  docs.push(makeFolder({ seed: 'gearfolder:gear', name: 'Equipo de aventura', type: 'Item', sort: 300000 }));
+
   for (const w of WEAPONS) {
     for (const [cond, row] of [['DE', w.de], ['BE', w.be]]) {
       const [damage, price, slots, range] = row;
@@ -285,6 +292,7 @@ function buildGear() {
         seed: `gear:weapon:${name}`,
         name,
         type: 'weapon',
+        folder: fW,
         system: {
           description: `<p>Arma. Competencia: ${w.prof}.</p>`,
           proficiency: w.prof,
@@ -310,6 +318,7 @@ function buildGear() {
         seed: `gear:${a.kind}:${name}`,
         name,
         type: a.kind,
+        folder: fA,
         system: {
           description: `<p>${a.kind === 'shield' ? 'Escudo' : 'Armadura'}. CA ${ac} (menor es mejor).</p>`,
           ac,
@@ -321,6 +330,23 @@ function buildGear() {
         }
       }));
     }
+  }
+  for (const g of GEAR) {
+    docs.push(makeItem({
+      seed: `gear:gear:${g.name}`,
+      name: g.name,
+      type: 'gear',
+      folder: fG,
+      system: {
+        description: '',
+        category: g.category,
+        size: { w: g.w, h: g.h },
+        slot: { x: null, y: null, equipped: false },
+        quantity: 1,
+        weight: g.weight,
+        price: g.price
+      }
+    }));
   }
   return docs;
 }

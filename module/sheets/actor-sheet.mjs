@@ -105,9 +105,11 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   // Debe coincidir con styles/aristilia.css
   static GRID = { cell: 40, gap: 2, pad: 4 };
 
-  // El elemento raíz de la app es ESTABLE entre re-renders; los listeners a nivel
-  // raíz deben adjuntarse una sola vez para no acumularse (parpadeo creciente).
-  #dndBound = false;
+  // Controlador para re-enganchar los listeners de DnD en CADA render. Al abortar
+  // el set anterior, nunca se acumulan (evita el parpadeo creciente) y siempre
+  // quedan sobre el root actual aunque Foundry lo reemplace (evita que la rejilla
+  // quede "inerte" y que los drops desde compendio dejen de crear el item).
+  #dndAbort = null;
 
   /** @override — engancha listeners tras cada render. */
   _onRender(context, options) {
@@ -115,21 +117,18 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const root = this.element;
     if (!root || !this.isEditable) return;
 
-    // Listeners por-elemento: el DOM interno se recrea en cada render, así que
-    // estos elementos son nuevos y no acumulan handlers.
+    this.#dndAbort?.abort();
+    this.#dndAbort = new AbortController();
+    const { signal } = this.#dndAbort;
+
     root.querySelectorAll('.inv-draggable').forEach((el) => {
-      el.addEventListener('dragstart', this.#onDragStart.bind(this));
+      el.addEventListener('dragstart', this.#onDragStart.bind(this), { signal });
     });
     root.querySelectorAll('.grid-item').forEach((el) => {
-      el.addEventListener('dblclick', this.#onGridUnplace.bind(this));
+      el.addEventListener('dblclick', this.#onGridUnplace.bind(this), { signal });
     });
-
-    // Listeners a nivel raíz: una sola vez.
-    if (!this.#dndBound) {
-      root.addEventListener('dragover', (ev) => ev.preventDefault());
-      root.addEventListener('drop', this.#onDrop.bind(this));
-      this.#dndBound = true;
-    }
+    root.addEventListener('dragover', (ev) => ev.preventDefault(), { signal });
+    root.addEventListener('drop', this.#onDrop.bind(this), { signal });
   }
 
   #onDragStart(event) {

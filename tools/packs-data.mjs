@@ -51,6 +51,69 @@ export const ARMOR = [
   A('Rodela', 'shield', [-1, 5, 1], [-1, 15, 1])
 ];
 
+// Equipo de aventura (gear). name, category(config), w, h (celdas de rejilla), price(sp), weight.
+const G = (name, category, w, h, price, weight = w * h) => ({ name, category, w, h, price, weight });
+
+export const GEAR = [
+  // Iluminación y fuego
+  G('Antorcha', 'supplies', 1, 1, 1),
+  G('Antorchas (paquete de 6)', 'supplies', 1, 1, 5),
+  G('Aceite para lámpara (frasco)', 'supplies', 1, 1, 2),
+  G('Linterna sorda', 'machinery', 1, 1, 12),
+  G('Vela', 'supplies', 1, 1, 1),
+  G('Yesca y pedernal', 'supplies', 1, 1, 3),
+  // Cuerdas y escalada
+  G('Cuerda de cáñamo (15 m)', 'supplies', 2, 1, 1),
+  G('Cuerda de seda (15 m)', 'supplies', 1, 1, 10),
+  G('Garfio', 'machinery', 1, 1, 5),
+  G('Picas de hierro (x10)', 'supplies', 1, 1, 1),
+  G('Estacas de hierro (x6)', 'supplies', 1, 1, 1),
+  // Comida y agua
+  G('Raciones frescas (1 día)', 'supplies', 1, 1, 1),
+  G('Raciones de hierro (7 días)', 'supplies', 1, 1, 15),
+  G('Odre de agua', 'supplies', 1, 1, 1),
+  G('Pellejo de vino', 'supplies', 1, 1, 1),
+  // Contenedores y descanso
+  G('Mochila', 'supplies', 2, 1, 5),
+  G('Saco grande', 'supplies', 1, 1, 1),
+  G('Bolsa pequeña', 'supplies', 1, 1, 1),
+  G('Cofre pequeño con cerradura', 'machinery', 2, 2, 15),
+  G('Saco de dormir', 'apparel', 2, 1, 3),
+  G('Manta de lana', 'apparel', 1, 1, 1),
+  G('Tienda (1 persona)', 'supplies', 2, 2, 10),
+  // Herramientas
+  G('Palanca de hierro', 'machinery', 2, 1, 2),
+  G('Martillo', 'supplies', 1, 1, 1),
+  G('Pala', 'machinery', 2, 1, 2),
+  G('Pico de minero', 'machinery', 2, 1, 3),
+  G('Herramientas de ladrón (ganzúas)', 'machinery', 1, 1, 25),
+  G('Espejo de acero pulido', 'supplies', 1, 1, 5),
+  G('Catalejo', 'machinery', 1, 1, 100),
+  G('Reloj de arena', 'machinery', 1, 1, 25),
+  // Curación
+  G('Kit de primeros auxilios', 'supplies', 1, 1, 5),
+  G('Kit de cirujano', 'machinery', 1, 1, 30),
+  G('Hierbas medicinales (dosis)', 'supplies', 1, 1, 10),
+  // Anti-monstruo y clero
+  G('Símbolo sagrado (madera)', 'apparel', 1, 1, 1),
+  G('Símbolo sagrado (plata)', 'apparel', 1, 1, 25),
+  G('Vial de agua bendita', 'supplies', 1, 1, 25),
+  G('Ristra de ajo', 'supplies', 1, 1, 1),
+  G('Acónito (matalobos)', 'supplies', 1, 1, 10),
+  G('Estaca de madera y mazo', 'supplies', 1, 1, 3),
+  // Sujeción
+  G('Cadena de hierro (3 m)', 'supplies', 1, 1, 30),
+  G('Grilletes', 'machinery', 1, 1, 15),
+  G('Candado con llave', 'machinery', 1, 1, 20),
+  // Varios
+  G('Silbato', 'supplies', 1, 1, 1),
+  G('Cuerno de señales', 'supplies', 1, 1, 5),
+  G('Red', 'machinery', 1, 1, 5),
+  G('Tiza (varias)', 'supplies', 1, 1, 1),
+  G('Papel/pergamino (hoja)', 'supplies', 1, 1, 1),
+  G('Tinta y pluma', 'supplies', 1, 1, 8)
+];
+
 /** Razas (RulesRaces*.jsx): bonos de atributo, HP, salvación, idiomas y rasgos especiales. */
 export const RACES = [
   {
