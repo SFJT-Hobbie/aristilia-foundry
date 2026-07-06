@@ -39,6 +39,11 @@
           {{/each}}
         </select>
       </label>
+      <div class="container-fields">
+        <p class="hint">{{localize 'ARISTILIA.Container.hint'}}</p>
+        <label>{{localize 'ARISTILIA.Container.cols'}} <input type="number" name="system.container.cols" value="{{system.container.cols}}" min="0" max="10" /></label>
+        <label>{{localize 'ARISTILIA.Container.rows'}} <input type="number" name="system.container.rows" value="{{system.container.rows}}" min="0" max="10" /></label>
+      </div>
     {{/if}}
 
     {{#if (eq item.type 'spell')}}

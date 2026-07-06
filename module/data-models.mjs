@@ -193,6 +193,8 @@ function gridFields() {
       y: new fields.NumberField({ integer: true, initial: 0, nullable: true }),
       equipped: new fields.BooleanField({ initial: false })
     }),
+    // Id de la mochila-contenedor que contiene a este objeto ('' = inventario principal).
+    containerId: new fields.StringField({ initial: '' }),
     quantity: new fields.NumberField({ integer: true, initial: 1, min: 0 }),
     // Apilado (bundle): cuántas unidades entran en un solo objeto/celda. 1 = no apilable.
     stack: new fields.SchemaField({
@@ -243,7 +245,12 @@ export class GearData extends foundry.abstract.TypeDataModel {
     return {
       description: new fields.HTMLField({ initial: '' }),
       ...gridFields(),
-      category: new fields.StringField({ initial: 'supplies' })
+      category: new fields.StringField({ initial: 'supplies' }),
+      // Mochila-contenedor: rejilla interna propia. cols>0 && rows>0 => es contenedor.
+      container: new fields.SchemaField({
+        cols: new fields.NumberField({ integer: true, initial: 0, min: 0, max: 10 }),
+        rows: new fields.NumberField({ integer: true, initial: 0, min: 0, max: 10 })
+      })
     };
   }
 }

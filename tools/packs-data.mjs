@@ -51,8 +51,8 @@ export const ARMOR = [
   A('Rodela', 'shield', [-1, 5, 1], [-1, 15, 1])
 ];
 
-// Equipo de aventura (gear). name, category(config), w, h (celdas de rejilla), price(sp), weight.
-const G = (name, category, w, h, price, weight = w * h) => ({ name, category, w, h, price, weight });
+// Equipo de aventura (gear). name, category(config), w, h (celdas de rejilla), price(sp), weight, container({cols,rows} si es mochila-contenedor).
+const G = (name, category, w, h, price, weight = w * h, container = null) => ({ name, category, w, h, price, weight, container });
 
 export const GEAR = [
   // Iluminación y fuego
@@ -74,7 +74,9 @@ export const GEAR = [
   G('Odre de agua', 'supplies', 1, 1, 1),
   G('Pellejo de vino', 'supplies', 1, 1, 1),
   // Contenedores y descanso
-  G('Mochila', 'supplies', 2, 1, 5),
+  G('Morral', 'supplies', 1, 1, 2, 1, { cols: 2, rows: 1 }),
+  G('Mochila', 'supplies', 2, 1, 5, 2, { cols: 2, rows: 2 }),
+  G('Mochila grande', 'supplies', 2, 2, 12, 4, { cols: 2, rows: 3 }),
   G('Saco grande', 'supplies', 1, 1, 1),
   G('Bolsa pequeña', 'supplies', 1, 1, 1),
   G('Cofre pequeño con cerradura', 'machinery', 2, 2, 15),

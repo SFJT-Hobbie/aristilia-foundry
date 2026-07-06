@@ -109,6 +109,7 @@ function preloadTemplates() {
     'systems/aristilia/templates/actor/npc-sheet.hbs',
     'systems/aristilia/templates/actor/parts/attributes.hbs',
     'systems/aristilia/templates/actor/parts/inventory-grid.hbs',
+    'systems/aristilia/templates/actor/parts/grid-block.hbs',
     'systems/aristilia/templates/actor/parts/proficiencies.hbs',
     'systems/aristilia/templates/item/item-sheet.hbs',
     'systems/aristilia/templates/chat/target20-card.hbs',

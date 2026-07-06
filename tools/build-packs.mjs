@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.16.0';
+const SYSTEM_VERSION = '0.17.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -342,6 +342,7 @@ function buildGear() {
       system: {
         description: '',
         category: g.category,
+        container: g.container ?? { cols: 0, rows: 0 },
         size: { w: g.w, h: g.h },
         slot: { x: null, y: null, equipped: false },
         quantity: 1,

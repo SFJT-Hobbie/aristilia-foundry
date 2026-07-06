@@ -33,7 +33,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       toChat: BaseActorSheet.#onToChat,
       toggleEquip: BaseActorSheet.#onToggleEquip,
       switchTab: BaseActorSheet.#onSwitchTab,
-      unplaceItem: BaseActorSheet.#onUnplaceItem
+      unplaceItem: BaseActorSheet.#onUnplaceItem,
+      viewContainer: BaseActorSheet.#onViewContainer
     }
   };
 
@@ -65,36 +66,23 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       inventory
     };
 
-    // Grid de inventario: items colocados (con slot) vs. mochila (sin colocar)
-    const { cell, gap, pad } = BaseActorSheet.GRID;
+    // Grid principal: objetos del inventario principal, EXCLUYENDO las mochilas
+    // equipadas (que se muestran como rejilla anexa). Los objetos dentro de una
+    // mochila (containerId) tampoco están en el principal.
     const cols = actor.system.inventory?.cols ?? 5;
     const rows = actor.system.inventory?.rows ?? 5;
-    const stride = cell + gap;
-    const isPlaced = (i) => Number.isInteger(i.system.slot?.x) && Number.isInteger(i.system.slot?.y);
-    context.grid = {
-      cols, rows,
-      cells: cols * rows,
-      widthPx: pad * 2 + cols * cell + (cols - 1) * gap,
-      heightPx: pad * 2 + rows * cell + (rows - 1) * gap,
-      placed: inventory.filter(isPlaced).map((i) => {
-        const w = i.system.size?.w ?? 1;
-        const h = i.system.size?.h ?? 1;
-        const detail = i.type === 'weapon' ? i.system.damage
-          : (i.type === 'armor' || i.type === 'shield') ? `CA ${i.system.ac}`
-          : '';
-        const qty = i.system.quantity ?? 1;
-        const tooltip = `${i.name}${detail ? ` — ${detail}` : ''}${qty > 1 ? ` ×${qty}` : ''}`;
-        return {
-          id: i.id, name: i.name, img: i.img, qty, showQty: qty > 1, tooltip,
-          leftPx: pad + i.system.slot.x * stride,
-          topPx: pad + i.system.slot.y * stride,
-          wPx: w * cell + (w - 1) * gap,
-          hPx: h * cell + (h - 1) * gap
-        };
-      }),
-      // La lista muestra TODOS los objetos, marcando cuáles están colocados en la rejilla.
-      all: inventory.map((i) => ({ item: i, placed: isPlaced(i) }))
-    };
+    const mainItems = inventory.filter((i) =>
+      !i.system.containerId && !(this.#isContainer(i) && i.system.slot?.equipped));
+    context.grid = this.#gridData(mainItems, cols, rows, '');
+
+    // Rejillas anexas: una por cada mochila-contenedor EQUIPADA.
+    context.containers = inventory
+      .filter((i) => this.#isContainer(i) && i.system.slot?.equipped)
+      .map((c) => ({
+        id: c.id, name: c.name, img: c.img,
+        ...this.#gridData(inventory.filter((x) => x.system.containerId === c.id),
+          c.system.container.cols, c.system.container.rows, c.id)
+      }));
 
     // Biografía / descripción enriquecida
     const rawBio = actor.system.biography ?? actor.system.description ?? '';
@@ -103,6 +91,44 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       secrets: actor.isOwner
     });
     return context;
+  }
+
+  /** ¿El objeto es una mochila-contenedor (gear con rejilla interna)? */
+  #isContainer(i) {
+    return i.type === 'gear' && (i.system.container?.cols ?? 0) > 0 && (i.system.container?.rows ?? 0) > 0;
+  }
+
+  /** Construye los datos de una rejilla (principal o de mochila) para el template. */
+  #gridData(items, cols, rows, containerId) {
+    const { cell, gap, pad } = BaseActorSheet.GRID;
+    const stride = cell + gap;
+    const isPlaced = (i) => Number.isInteger(i.system.slot?.x) && Number.isInteger(i.system.slot?.y);
+    return {
+      cols, rows, containerId,
+      cells: cols * rows,
+      widthPx: pad * 2 + cols * cell + (cols - 1) * gap,
+      heightPx: pad * 2 + rows * cell + (rows - 1) * gap,
+      placed: items.filter(isPlaced).map((i) => {
+        const w = i.system.size?.w ?? 1;
+        const h = i.system.size?.h ?? 1;
+        const detail = i.type === 'weapon' ? i.system.damage
+          : (i.type === 'armor' || i.type === 'shield') ? `CA ${i.system.ac}` : '';
+        const qty = i.system.quantity ?? 1;
+        return {
+          id: i.id, name: i.name, img: i.img, qty, showQty: qty > 1,
+          tooltip: `${i.name}${detail ? ` — ${detail}` : ''}${qty > 1 ? ` ×${qty}` : ''}`,
+          leftPx: pad + i.system.slot.x * stride,
+          topPx: pad + i.system.slot.y * stride,
+          wPx: w * cell + (w - 1) * gap,
+          hPx: h * cell + (h - 1) * gap
+        };
+      }),
+      all: items.map((i) => ({
+        item: i, placed: isPlaced(i),
+        container: this.#isContainer(i),
+        inside: this.document.items.filter((x) => x.system.containerId === i.id).length
+      }))
+    };
   }
 
   /* ---------- Grid de inventario (drag & drop) ---------- */
@@ -155,13 +181,11 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const owned = data.aristiliaItemId && this.document.items.get(data.aristiliaItemId);
     if (owned) {
       if (overGrid) {
-        // Soltado sobre la rejilla -> colocar/reposicionar
+        // Soltado sobre una rejilla (principal o de mochila) -> colocar/reposicionar
         await this.#placeInGrid(owned, event, overGrid);
       } else if (event.target.closest?.('.inventory-block')) {
-        // Soltado fuera de la rejilla (en la lista de Objetos) -> quitar de la rejilla
-        if (Number.isInteger(owned.system.slot?.x)) {
-          await owned.update({ 'system.slot.x': null, 'system.slot.y': null });
-        }
+        // Soltado en la lista -> al inventario principal, sin colocar (sale de cualquier mochila)
+        await owned.update({ 'system.slot.x': null, 'system.slot.y': null, 'system.containerId': '' });
       }
       return;
     }
@@ -175,23 +199,38 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     }
   }
 
-  async #placeInGrid(item, event, grid) {
-    const rect = grid.getBoundingClientRect();
+  async #placeInGrid(item, event, gridEl) {
+    const containerId = gridEl.dataset.containerId || '';
+
+    // Las mochilas nunca ocupan una rejilla: van a la lista (o se rechaza anidar).
+    if (this.#isContainer(item)) {
+      if (containerId) { ui.notifications.warn(game.i18n.localize('ARISTILIA.Container.noNest')); return; }
+      await item.update({ 'system.slot.x': null, 'system.slot.y': null, 'system.containerId': '' });
+      return;
+    }
+
+    const rect = gridEl.getBoundingClientRect();
     const { cell, gap, pad } = BaseActorSheet.GRID;
     const stride = cell + gap;
     let x = Math.floor((event.clientX - rect.left - pad) / stride);
     let y = Math.floor((event.clientY - rect.top - pad) / stride);
 
-    const cols = this.document.system.inventory?.cols ?? 5;
-    const rows = this.document.system.inventory?.rows ?? 5;
+    let cols, rows;
+    if (containerId) {
+      const c = this.document.items.get(containerId);
+      cols = c?.system.container?.cols ?? 0;
+      rows = c?.system.container?.rows ?? 0;
+    } else {
+      cols = this.document.system.inventory?.cols ?? 5;
+      rows = this.document.system.inventory?.rows ?? 5;
+    }
     const w = item.system.size?.w ?? 1;
     const h = item.system.size?.h ?? 1;
     x = Math.min(Math.max(0, x), Math.max(0, cols - w));
     y = Math.min(Math.max(0, y), Math.max(0, rows - h));
 
-    // Fusión de bundles: si el destino tiene un apilado del mismo objeto con hueco,
-    // se juntan en una sola celda hasta el máximo; el sobrante queda como estaba.
-    const target = this.#stackTargetAt(x, y, item);
+    // Fusión de bundles (dentro de la misma rejilla): apilado del mismo objeto con hueco.
+    const target = this.#stackTargetAt(x, y, item, containerId);
     if (target) {
       const max = target.system.stack?.max ?? 1;
       const space = Math.max(0, max - (target.system.quantity ?? 1));
@@ -203,18 +242,19 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       }
     }
 
-    if (this.#gridCollision(x, y, w, h, item.id)) {
+    if (this.#gridCollision(x, y, w, h, item.id, containerId)) {
       ui.notifications.warn(game.i18n.localize('ARISTILIA.Inventory.collision'));
       return;
     }
-    await item.update({ 'system.slot.x': x, 'system.slot.y': y });
+    await item.update({ 'system.slot.x': x, 'system.slot.y': y, 'system.containerId': containerId });
   }
 
-  /** Apilado del mismo objeto (nombre+tipo, apilable, con hueco) que cubre la celda destino. */
-  #stackTargetAt(x, y, item) {
+  /** Apilado del mismo objeto en la MISMA rejilla (mismo containerId) que cubre la celda. */
+  #stackTargetAt(x, y, item, containerId) {
     if ((item.system.stack?.max ?? 1) <= 1) return null;
     return this.document.items.find((i) =>
       i.id !== item.id && i.type === item.type && i.name === item.name &&
+      (i.system.containerId || '') === containerId &&
       (i.system.stack?.max ?? 1) > 1 &&
       (i.system.quantity ?? 1) < (i.system.stack?.max ?? 1) &&
       Number.isInteger(i.system.slot?.x) && Number.isInteger(i.system.slot?.y) &&
@@ -223,10 +263,11 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     ) ?? null;
   }
 
-  #gridCollision(x, y, w, h, ignoreId) {
+  #gridCollision(x, y, w, h, ignoreId, containerId) {
     const placed = this.document.items.filter((i) =>
       i.id !== ignoreId &&
       ['weapon', 'armor', 'shield', 'gear'].includes(i.type) &&
+      (i.system.containerId || '') === containerId &&
       Number.isInteger(i.system.slot?.x) && Number.isInteger(i.system.slot?.y)
     );
     for (const i of placed) {
@@ -241,12 +282,41 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   async #onGridUnplace(event) {
     const id = event.currentTarget.dataset.itemId;
     const item = this.document.items.get(id);
-    if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null });
+    if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null, 'system.containerId': '' });
   }
 
   static async #onUnplaceItem(event, target) {
     const item = this.document.items.get(target.dataset.itemId);
-    if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null });
+    if (item) await item.update({ 'system.slot.x': null, 'system.slot.y': null, 'system.containerId': '' });
+  }
+
+  /** Pop-up para ver/retirar el contenido de una mochila (equipada o guardada). */
+  static async #onViewContainer(event, target) {
+    const container = this.document.items.get(target.dataset.itemId);
+    if (!container) return;
+    const inside = this.document.items.filter((i) => i.system.containerId === container.id);
+    const rows = inside.length
+      ? inside.map((i) => {
+          const qty = (i.system.quantity ?? 1) > 1 ? ` ×${i.system.quantity}` : '';
+          return `<li><span>${foundry.utils.escapeHTML(i.name)}${qty}</span><a data-take="${i.id}">${game.i18n.localize('ARISTILIA.Container.take')}</a></li>`;
+        }).join('')
+      : `<li class="empty">${game.i18n.localize('ARISTILIA.Container.empty')}</li>`;
+    await foundry.applications.api.DialogV2.wait({
+      window: { title: container.name, icon: 'fas fa-box-open' },
+      classes: ['aristilia', 'dialog'],
+      content: `<div class="aristilia-create-dialog"><ol class="container-contents">${rows}</ol></div>`,
+      rejectClose: false,
+      buttons: [{ action: 'close', label: game.i18n.localize('ARISTILIA.Icon.close'), default: true }],
+      render: (ev, dialog) => {
+        dialog.element.querySelectorAll('a[data-take]').forEach((el) => {
+          el.addEventListener('click', async () => {
+            const it = this.document.items.get(el.dataset.take);
+            if (it) await it.update({ 'system.containerId': '', 'system.slot.x': null, 'system.slot.y': null });
+            el.closest('li')?.remove();
+          });
+        });
+      }
+    });
   }
 
   /* ---------- Modificador situacional ---------- */

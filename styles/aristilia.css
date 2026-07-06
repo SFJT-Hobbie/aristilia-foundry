@@ -471,6 +471,39 @@
 .aristilia-sheet .inv-draggable { cursor: grab; }
 .aristilia-sheet .backpack-title { margin-top: 8px; }
 
+/* Mochila-contenedor: rejilla anexa */
+.aristilia-sheet .container-block { margin: 12px 0 4px; }
+.aristilia-sheet .container-block > h4 {
+  font-family: "Modesto Condensed", "Signika", Georgia, serif;
+  font-variant: small-caps;
+  letter-spacing: 0.6px;
+  color: var(--ar-oxblood);
+  margin: 8px 0 6px;
+}
+.aristilia-sheet .container-block > h4 i { color: var(--ar-gold-bright); margin-right: 4px; }
+.aristilia-sheet .container-block > h4 small { color: var(--ar-ink-soft); font-variant: normal; }
+.aristilia-sheet .items-list .item-controls a.on { color: var(--ar-oxblood); text-shadow: 0 0 6px rgba(156, 123, 58, 0.7); }
+/* Campos de contenedor en la ficha de objeto */
+.aristilia-sheet .container-fields {
+  grid-column: span 2;
+  border-top: 1px dashed var(--ar-border);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+.aristilia-sheet .container-fields .hint { margin: 0 0 4px; }
+/* Pop-up "ver contenido" */
+.aristilia-create-dialog .container-contents { list-style: none; margin: 0; padding: 0; }
+.aristilia-create-dialog .container-contents li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px;
+  border-bottom: 1px solid rgba(156, 123, 58, 0.3);
+}
+.aristilia-create-dialog .container-contents li a { cursor: pointer; color: #7a2d22; font-variant: small-caps; font-weight: 700; }
+.aristilia-create-dialog .container-contents li.empty { justify-content: center; font-style: italic; opacity: 0.7; }
+
 /* Moneda e idiomas (ficha de personaje) */
 .aristilia-sheet .resources-block { margin: 14px 0 4px; display: flex; flex-direction: column; gap: 8px; }
 .aristilia-sheet .resources-block .currency { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

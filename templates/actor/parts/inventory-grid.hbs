@@ -6,23 +6,14 @@
   </h3>
   <p class="hint">{{localize 'ARISTILIA.Inventory.hint'}}</p>
 
-  <div class="inventory-grid" style="width: {{grid.widthPx}}px; height: {{grid.heightPx}}px;">
-    <div class="grid-bg" style="grid-template-columns: repeat({{grid.cols}}, 40px); grid-auto-rows: 40px;">
-      {{#each (aristiliaRange grid.cells) as |cell|}}
-        <div class="grid-cell"></div>
-      {{/each}}
-    </div>
+  {{> "systems/aristilia/templates/actor/parts/grid-block.hbs" grid}}
 
-    {{#each grid.placed as |it|}}
-      <div class="grid-item inv-draggable" draggable="true" data-item-id="{{it.id}}"
-           data-tooltip="{{it.tooltip}}" data-tooltip-direction="UP"
-           style="left: {{it.leftPx}}px; top: {{it.topPx}}px; width: {{it.wPx}}px; height: {{it.hPx}}px;">
-        <img src="{{it.img}}" alt="{{it.name}}" />
-        {{#if it.showQty}}<span class="grid-qty">{{it.qty}}</span>{{/if}}
-        <span class="grid-label">{{it.name}}</span>
-      </div>
-    {{/each}}
-  </div>
+  {{#each containers as |c|}}
+    <div class="container-block">
+      <h4><i class="fas fa-box-open"></i> {{c.name}} <small>({{c.cols}} × {{c.rows}})</small></h4>
+      {{> "systems/aristilia/templates/actor/parts/grid-block.hbs" c}}
+    </div>
+  {{/each}}
 
   <h4 class="backpack-title">{{localize 'ARISTILIA.Inventory.items'}}</h4>
   <ol class="items-list inventory-list">
@@ -30,12 +21,21 @@
       <li class="item {{#unless entry.placed}}inv-draggable{{/unless}}" data-item-id="{{entry.item.id}}" {{#unless entry.placed}}draggable="true"{{/unless}}>
         <img class="item-icon" src="{{entry.item.img}}" alt="{{entry.item.name}}" />
         <span class="item-name">{{entry.item.name}}</span>
-        {{#if entry.placed}}
-          <span class="badge placed" title="{{localize 'ARISTILIA.Inventory.placedHint'}}"><i class="fas fa-thumbtack"></i> {{localize 'ARISTILIA.Inventory.placed'}}</span>
+        {{#if entry.container}}
+          <span class="badge"><i class="fas fa-box-open"></i> {{localize 'ARISTILIA.Container.label'}} {{entry.inside}}</span>
         {{else}}
-          <span class="item-detail">{{entry.item.system.size.w}}×{{entry.item.system.size.h}}</span>
+          {{#if entry.placed}}
+            <span class="badge placed" title="{{localize 'ARISTILIA.Inventory.placedHint'}}"><i class="fas fa-thumbtack"></i> {{localize 'ARISTILIA.Inventory.placed'}}</span>
+          {{else}}
+            <span class="item-detail">{{entry.item.system.size.w}}×{{entry.item.system.size.h}}</span>
+          {{/if}}
         {{/if}}
         <span class="item-controls">
+          {{#if entry.container}}
+            <a data-action="toggleEquip" data-item-id="{{entry.item.id}}" class="{{#if entry.item.system.slot.equipped}}on{{/if}}"
+               title="{{#if entry.item.system.slot.equipped}}{{localize 'ARISTILIA.Container.store'}}{{else}}{{localize 'ARISTILIA.Container.wear'}}{{/if}}"><i class="fas fa-person-hiking"></i></a>
+            <a data-action="viewContainer" data-item-id="{{entry.item.id}}" title="{{localize 'ARISTILIA.Container.view'}}"><i class="fas fa-eye"></i></a>
+          {{/if}}
           {{#if entry.placed}}
             <a data-action="unplaceItem" data-item-id="{{entry.item.id}}" title="{{localize 'ARISTILIA.Inventory.unplace'}}"><i class="fas fa-arrow-rotate-left"></i></a>
           {{/if}}

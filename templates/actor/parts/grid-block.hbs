@@ -1,0 +1,18 @@
+{{! Rejilla reutilizable. Contexto = un objeto de rejilla (principal o de mochila). }}
+<div class="inventory-grid" data-container-id="{{containerId}}" style="width: {{widthPx}}px; height: {{heightPx}}px;">
+  <div class="grid-bg" style="grid-template-columns: repeat({{cols}}, 40px); grid-auto-rows: 40px;">
+    {{#each (aristiliaRange cells) as |cell|}}
+      <div class="grid-cell"></div>
+    {{/each}}
+  </div>
+
+  {{#each placed as |it|}}
+    <div class="grid-item inv-draggable" draggable="true" data-item-id="{{it.id}}"
+         data-tooltip="{{it.tooltip}}" data-tooltip-direction="UP"
+         style="left: {{it.leftPx}}px; top: {{it.topPx}}px; width: {{it.wPx}}px; height: {{it.hPx}}px;">
+      <img src="{{it.img}}" alt="{{it.name}}" />
+      {{#if it.showQty}}<span class="grid-qty">{{it.qty}}</span>{{/if}}
+      <span class="grid-label">{{it.name}}</span>
+    </div>
+  {{/each}}
+</div>
