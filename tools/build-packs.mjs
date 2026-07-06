@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.15.0';
+const SYSTEM_VERSION = '0.16.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -277,6 +277,7 @@ function buildMonsters() {
 
 function buildGear() {
   const docs = [];
+  const AMMO = new Set(['Flechas', 'Virotes', 'Piedras']); // apilables en bundles
   const fW = makeId('gearfolder:weapons');
   const fA = makeId('gearfolder:armor');
   const fG = makeId('gearfolder:gear');
@@ -304,6 +305,7 @@ function buildGear() {
           size: { w: 1, h: slots },
           slot: { x: null, y: null, equipped: false },
           quantity: 1,
+          stack: { max: AMMO.has(w.name) ? 20 : 1 },
           weight: slots,
           price
         }

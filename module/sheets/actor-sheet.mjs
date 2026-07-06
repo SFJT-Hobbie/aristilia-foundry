@@ -189,11 +189,38 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     x = Math.min(Math.max(0, x), Math.max(0, cols - w));
     y = Math.min(Math.max(0, y), Math.max(0, rows - h));
 
+    // Fusión de bundles: si el destino tiene un apilado del mismo objeto con hueco,
+    // se juntan en una sola celda hasta el máximo; el sobrante queda como estaba.
+    const target = this.#stackTargetAt(x, y, item);
+    if (target) {
+      const max = target.system.stack?.max ?? 1;
+      const space = Math.max(0, max - (target.system.quantity ?? 1));
+      const moved = Math.min(space, item.system.quantity ?? 1);
+      if (moved > 0) {
+        await target.update({ 'system.quantity': (target.system.quantity ?? 1) + moved });
+        const remain = (item.system.quantity ?? 1) - moved;
+        return remain <= 0 ? item.delete() : item.update({ 'system.quantity': remain });
+      }
+    }
+
     if (this.#gridCollision(x, y, w, h, item.id)) {
       ui.notifications.warn(game.i18n.localize('ARISTILIA.Inventory.collision'));
       return;
     }
     await item.update({ 'system.slot.x': x, 'system.slot.y': y });
+  }
+
+  /** Apilado del mismo objeto (nombre+tipo, apilable, con hueco) que cubre la celda destino. */
+  #stackTargetAt(x, y, item) {
+    if ((item.system.stack?.max ?? 1) <= 1) return null;
+    return this.document.items.find((i) =>
+      i.id !== item.id && i.type === item.type && i.name === item.name &&
+      (i.system.stack?.max ?? 1) > 1 &&
+      (i.system.quantity ?? 1) < (i.system.stack?.max ?? 1) &&
+      Number.isInteger(i.system.slot?.x) && Number.isInteger(i.system.slot?.y) &&
+      x >= i.system.slot.x && x < i.system.slot.x + (i.system.size?.w ?? 1) &&
+      y >= i.system.slot.y && y < i.system.slot.y + (i.system.size?.h ?? 1)
+    ) ?? null;
   }
 
   #gridCollision(x, y, w, h, ignoreId) {

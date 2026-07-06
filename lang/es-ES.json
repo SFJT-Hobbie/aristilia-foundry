@@ -185,6 +185,7 @@
   "ARISTILIA.Item.width": "Ancho",
   "ARISTILIA.Item.height": "Alto",
   "ARISTILIA.Item.quantity": "Cantidad",
+  "ARISTILIA.Item.stackMax": "Máx. por bundle",
   "ARISTILIA.Item.weight": "Peso",
   "ARISTILIA.Item.price": "Precio",
 

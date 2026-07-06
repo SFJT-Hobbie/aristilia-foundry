@@ -194,6 +194,10 @@ function gridFields() {
       equipped: new fields.BooleanField({ initial: false })
     }),
     quantity: new fields.NumberField({ integer: true, initial: 1, min: 0 }),
+    // Apilado (bundle): cuántas unidades entran en un solo objeto/celda. 1 = no apilable.
+    stack: new fields.SchemaField({
+      max: new fields.NumberField({ integer: true, initial: 1, min: 1 })
+    }),
     weight: new fields.NumberField({ initial: 0, min: 0 }),
     price: new fields.NumberField({ initial: 0, min: 0 }) // en piezas de plata (sp)
   };
