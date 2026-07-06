@@ -15,9 +15,11 @@
 
     {{#each grid.placed as |it|}}
       <div class="grid-item inv-draggable" draggable="true" data-item-id="{{it.id}}"
-           title="{{it.name}} — {{localize 'ARISTILIA.Inventory.unplaceHint'}}"
+           data-tooltip="{{it.tooltip}}" data-tooltip-direction="UP"
            style="left: {{it.leftPx}}px; top: {{it.topPx}}px; width: {{it.wPx}}px; height: {{it.hPx}}px;">
         <img src="{{it.img}}" alt="{{it.name}}" />
+        {{#if it.showQty}}<span class="grid-qty">{{it.qty}}</span>{{/if}}
+        <span class="grid-label">{{it.name}}</span>
       </div>
     {{/each}}
   </div>

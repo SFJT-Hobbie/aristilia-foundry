@@ -79,8 +79,13 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       placed: inventory.filter(isPlaced).map((i) => {
         const w = i.system.size?.w ?? 1;
         const h = i.system.size?.h ?? 1;
+        const detail = i.type === 'weapon' ? i.system.damage
+          : (i.type === 'armor' || i.type === 'shield') ? `CA ${i.system.ac}`
+          : '';
+        const qty = i.system.quantity ?? 1;
+        const tooltip = `${i.name}${detail ? ` — ${detail}` : ''}${qty > 1 ? ` ×${qty}` : ''}`;
         return {
-          id: i.id, name: i.name, img: i.img,
+          id: i.id, name: i.name, img: i.img, qty, showQty: qty > 1, tooltip,
           leftPx: pad + i.system.slot.x * stride,
           topPx: pad + i.system.slot.y * stride,
           wPx: w * cell + (w - 1) * gap,
