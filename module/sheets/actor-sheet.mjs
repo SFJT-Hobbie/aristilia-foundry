@@ -35,7 +35,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       switchTab: BaseActorSheet.#onSwitchTab,
       unplaceItem: BaseActorSheet.#onUnplaceItem,
       placeItem: BaseActorSheet.#onPlaceItem,
-      viewContainer: BaseActorSheet.#onViewContainer
+      viewContainer: BaseActorSheet.#onViewContainer,
+      pickSpell: BaseActorSheet.#onPickSpell
     }
   };
 
@@ -50,6 +51,9 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   /** Índice cacheado de objetos de compendio (weapon/armor/shield/gear). */
   #packCache = null;
+
+  /** Índice cacheado de hechizos de compendio. */
+  #spellCache = null;
 
   /** @override */
   async _prepareContext(options) {
@@ -450,6 +454,92 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         });
       }
     });
+  }
+
+  /** Índice (cacheado) de hechizos en compendios Item del sistema. */
+  async #spellIndex() {
+    if (!this.#spellCache) {
+      this.#spellCache = [];
+      for (const pack of game.packs) {
+        if (pack.metadata.type !== 'Item') continue;
+        let idx;
+        try { idx = await pack.getIndex(); } catch { continue; }
+        for (const e of idx) {
+          if (e.type !== 'spell') continue;
+          this.#spellCache.push({
+            uuid: e.uuid ?? `Compendium.${pack.collection}.Item.${e._id}`,
+            name: e.name,
+            school: foundry.utils.getProperty(e, 'system.school') ?? '',
+            branch: foundry.utils.getProperty(e, 'system.branch') ?? '',
+            level: foundry.utils.getProperty(e, 'system.level') ?? 0
+          });
+        }
+      }
+      this.#spellCache.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return this.#spellCache;
+  }
+
+  /** Selector de hechizos del compendio (buscar y añadir), con opción de crear uno propio. */
+  static async #onPickSpell() {
+    const cache = await this.#spellIndex();
+    const content = `<div class="aristilia-create-dialog spell-picker">
+      <div class="sp-filters">
+        <input type="search" class="sp-search" placeholder="${game.i18n.localize('ARISTILIA.Spell.search')}" autofocus />
+        <select class="sp-school">
+          <option value="">${game.i18n.localize('ARISTILIA.Spell.allSchools')}</option>
+          <option value="astral">Astral</option>
+          <option value="natural">Natural</option>
+        </select>
+      </div>
+      <div class="sp-results"><p class="hint">${game.i18n.localize('ARISTILIA.Spell.typeToSearch')}</p></div>
+    </div>`;
+
+    const action = await foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n.localize('ARISTILIA.Spell.pick'), icon: 'fas fa-hat-wizard' },
+      classes: ['aristilia', 'dialog'],
+      content,
+      rejectClose: false,
+      buttons: [
+        { action: 'custom', label: game.i18n.localize('ARISTILIA.Spell.custom') },
+        { action: 'close', label: game.i18n.localize('ARISTILIA.Icon.close'), default: true }
+      ],
+      render: (ev, dialog) => {
+        const el = dialog.element;
+        const search = el.querySelector('.sp-search');
+        const school = el.querySelector('.sp-school');
+        const results = el.querySelector('.sp-results');
+        const apply = () => {
+          const q = search.value.trim().toLowerCase();
+          const sc = school.value;
+          if (!q && !sc) { results.innerHTML = `<p class="hint">${game.i18n.localize('ARISTILIA.Spell.typeToSearch')}</p>`; return; }
+          let list = cache;
+          if (sc) list = list.filter((e) => e.school === sc);
+          if (q) list = list.filter((e) => e.name.toLowerCase().includes(q));
+          results.innerHTML = list.length
+            ? list.slice(0, 40).map((e) =>
+              `<div class="sp-row" data-uuid="${e.uuid}"><span class="sp-name">${foundry.utils.escapeHTML(e.name)}</span>` +
+              `<span class="sp-meta">${foundry.utils.escapeHTML(e.branch || e.school)} · N${e.level}</span>` +
+              `<a class="sp-add" title="${game.i18n.localize('ARISTILIA.Add')}"><i class="fas fa-plus"></i></a></div>`).join('')
+            : `<p class="hint">${game.i18n.localize('ARISTILIA.Spell.noResults')}</p>`;
+          results.querySelectorAll('.sp-add').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              const uuid = btn.closest('.sp-row')?.dataset.uuid;
+              const doc = uuid && await fromUuid(uuid);
+              if (doc) { await this.document.createEmbeddedDocuments('Item', [doc.toObject()]); ui.notifications.info(`${doc.name} ✓`); }
+            });
+          });
+        };
+        search.addEventListener('input', apply);
+        school.addEventListener('change', apply);
+      }
+    });
+
+    if (action === 'custom') {
+      const name = game.i18n.format('ARISTILIA.NewItem', { type: game.i18n.localize('TYPES.Item.spell') });
+      const [created] = await this.document.createEmbeddedDocuments('Item', [{ name, type: 'spell' }]);
+      created?.sheet.render(true);
+    }
   }
 
   /* ---------- Modificador situacional ---------- */

@@ -12,12 +12,12 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import { WEAPONS, ARMOR, SPELLS, RACES, CLASSES } from './packs-data.mjs';
+import { WEAPONS, ARMOR, RACES, CLASSES } from './packs-data.mjs';
 import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.18.0';
+const SYSTEM_VERSION = '0.22.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -132,7 +132,7 @@ function makeMacro({ seed, name, img, command }) {
   };
 }
 
-function makeFolder({ seed, name, type, sort = 0 }) {
+function makeFolder({ seed, name, type, sort = 0, parent = null }) {
   const _id = makeId(seed);
   return {
     _id,
@@ -143,7 +143,7 @@ function makeFolder({ seed, name, type, sort = 0 }) {
     color: null,
     sorting: 'a',
     sort,
-    folder: null,
+    folder: parent,
     flags: {},
     _stats: {
       systemId: 'aristilia',
@@ -426,20 +426,53 @@ function buildClasses() {
 }
 
 function buildSpells() {
-  return SPELLS.map((s) => makeItem({
-    seed: `spell:${s.school}:${s.name}`,
-    name: s.name,
-    type: 'spell',
-    system: {
-      description: `<p>${s.description}</p>`,
-      school: s.school,
-      level: s.level,
-      cost: s.cost ?? '',
-      castingTime: s.castingTime ?? '',
-      range: s.range ?? '',
-      duration: s.duration ?? ''
-    }
-  }));
+  const src = JSON.parse(readFileSync(join(root, 'tools', 'spell-source.json'), 'utf8'));
+  const docs = [];
+  const SCHOOL_LABEL = { astral: 'Astral', natural: 'Natural', voiceForm: 'Voz y Forma' };
+  const SCHOOL_ORDER = ['astral', 'natural', 'voiceForm'];
+
+  // Carpetas: escuela (Astral/Natural) con subcarpetas por rama (Gris/Blanca/Negra, Agua/…).
+  const schoolFolder = {};
+  [...new Set(src.map((s) => s.school))]
+    .sort((a, b) => SCHOOL_ORDER.indexOf(a) - SCHOOL_ORDER.indexOf(b))
+    .forEach((sc, i) => {
+      schoolFolder[sc] = makeId(`spellfolder:${sc}`);
+      docs.push(makeFolder({ seed: `spellfolder:${sc}`, name: SCHOOL_LABEL[sc] ?? sc, type: 'Item', sort: (i + 1) * 100000 }));
+    });
+  const branchFolder = {};
+  [...new Set(src.map((s) => `${s.school}::${s.branch}`))].sort().forEach((key, i) => {
+    const [sc, br] = key.split('::');
+    branchFolder[key] = makeId(`spellfolder:${sc}:${br}`);
+    docs.push(makeFolder({ seed: `spellfolder:${sc}:${br}`, name: br || '(sin rama)', type: 'Item', parent: schoolFolder[sc], sort: (i + 1) * 1000 }));
+  });
+
+  for (const s of src) {
+    const parts = [];
+    if (s.summary) parts.push(`<p>${esc(s.summary)}</p>`);
+    const meta = [];
+    if (s.branch) meta.push(`<strong>Rama:</strong> ${esc(s.branch)}`);
+    if (s.tags?.length) meta.push(`<strong>Tags:</strong> ${esc(s.tags.join(', '))}`);
+    const pf = [s.pfSchool, s.pfSub, s.pfDescriptor].filter(Boolean).join(' / ');
+    if (pf) meta.push(`<em>PF: ${esc(pf)}</em>`);
+    if (s.source) meta.push(`<em>Fuente: ${esc(s.source)}</em>`);
+    if (meta.length) parts.push(`<p>${meta.join(' · ')}</p>`);
+
+    docs.push(makeItem({
+      seed: `spell:${s.school}:${s.branch}:${s.name}`,
+      name: s.name,
+      type: 'spell',
+      folder: branchFolder[`${s.school}::${s.branch}`],
+      system: {
+        description: parts.join('\n'),
+        school: s.school,
+        branch: s.branch,
+        tags: (s.tags ?? []).join(', '),
+        level: s.level,
+        cost: '', castingTime: '', range: '', duration: ''
+      }
+    }));
+  }
+  return docs;
 }
 
 function docStats() {

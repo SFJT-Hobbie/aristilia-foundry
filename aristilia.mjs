@@ -43,6 +43,9 @@ Hooks.once('init', function () {
   CONFIG.Actor.dataModels.character = models.CharacterData;
   CONFIG.Actor.dataModels.npc = models.NpcData;
 
+  // Campos extra en el índice de compendios de Item (para el selector de hechizos)
+  CONFIG.Item.compendiumIndexFields = ['system.school', 'system.branch', 'system.level'];
+
   // DataModels de Item
   CONFIG.Item.dataModels.weapon = models.WeaponData;
   CONFIG.Item.dataModels.armor = models.ArmorData;
@@ -115,7 +118,8 @@ function preloadTemplates() {
     'systems/aristilia/templates/chat/target20-card.hbs',
     'systems/aristilia/templates/chat/skill-card.hbs',
     'systems/aristilia/templates/chat/damage-card.hbs',
-    'systems/aristilia/templates/chat/item-card.hbs'
+    'systems/aristilia/templates/chat/item-card.hbs',
+    'systems/aristilia/templates/chat/spell-card.hbs'
   ];
   return foundry.applications.handlebars.loadTemplates(paths);
 }

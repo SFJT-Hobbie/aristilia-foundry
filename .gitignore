@@ -1,5 +1,9 @@
 node_modules/
 aristilia.zip
+# Directorios temporales de descarga del repo del usuario (se regeneran con los scripts de fetch)
+tools/repo-gear/
+tools/repo-spells/
+tools/xlsx-tmp/
 # NOTA: no ignorar *.log de forma global — LevelDB guarda datos en archivos NNNNNN.log
 # Archivos de bloqueo y logs de depuración de LevelDB (se regeneran solos)
 packs/**/LOCK
