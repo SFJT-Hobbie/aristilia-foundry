@@ -63,21 +63,12 @@ export class AristiliaActor extends Actor {
 }
 
 export class AristiliaItem extends Item {
-  /** Envía una tarjeta de descripción del Item al chat (card especial para hechizos). */
+  /** Envía una tarjeta de descripción del Item al chat. */
   async toChat() {
-    const isSpell = this.type === 'spell';
-    const template = isSpell
-      ? 'systems/aristilia/templates/chat/spell-card.hbs'
-      : 'systems/aristilia/templates/chat/item-card.hbs';
-    const enriched = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
-      this.system.description ?? '', { relativeTo: this }
+    const content = await foundry.applications.handlebars.renderTemplate(
+      'systems/aristilia/templates/chat/item-card.hbs',
+      { item: this, system: this.system }
     );
-    const schoolLabel = isSpell
-      ? game.i18n.localize(CONFIG.ARISTILIA?.spellSchools?.[this.system.school] ?? this.system.school)
-      : '';
-    const content = await foundry.applications.handlebars.renderTemplate(template, {
-      item: this, system: this.system, enriched, schoolLabel
-    });
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content

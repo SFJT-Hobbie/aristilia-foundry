@@ -15,10 +15,9 @@ import { dirname, join, resolve } from 'node:path';
 import { WEAPONS, ARMOR, RACES, CLASSES } from './packs-data.mjs';
 import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
-import { OSR_SPELLS } from './osr-spells.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.23.0';
+const SYSTEM_VERSION = '0.23.1';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -426,84 +425,6 @@ function buildClasses() {
   }));
 }
 
-/** Elimina PF-ismos del texto (Pathfinder/D&D3.x) hacia terminología OSR/Aristilia. */
-function osrify(s) {
-  return String(s || '')
-    .replace(/ranged touch attack/gi, 'ranged attack')
-    .replace(/melee touch attack/gi, 'melee attack')
-    .replace(/\btouch attack\b/gi, 'attack')
-    .replace(/\b(Reflex|Fortitude|Will)\s+(?:half|negates|partial)\b/gi, 'save')
-    .replace(/\b(Reflex|Fortitude|Will)\s+save\b/gi, 'save')
-    .replace(/\b(Reflex|Fortitude|Will)\b/gi, 'save')
-    .replace(/\bspell resistance\b/gi, 'magic resistance')
-    .replace(/\bSR\b/g, 'MR')
-    .replace(/\bcaster level\b/gi, 'level')
-    .replace(/\bCM[BD]\b/g, 'maneuver')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-}
-
-function buildSpells() {
-  // Solo niveles 0-6: en Aristilia no existen hechizos >6 (serían rituales/objetos mágicos/lore).
-  const src = JSON.parse(readFileSync(join(root, 'tools', 'spell-source.json'), 'utf8'))
-    .filter((s) => (s.level ?? 0) <= 6);
-  const docs = [];
-  const SCHOOL_LABEL = { astral: 'Astral', natural: 'Natural', voiceForm: 'Voz y Forma' };
-  const SET_LABEL = { core: 'Núcleo OSR', ext: 'Extendido (adaptar)' };
-
-  // Núcleo OSR: hechizos cuyo nombre existe en el canon AD&D/B-X (ya balanceados).
-  const normName = (n) => String(n).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
-  const OSRset = new Set(OSR_SPELLS.map(normName));
-  const isCore = (name) => OSRset.has(normName(name));
-  const setOf = (s) => (isCore(s.name) ? 'core' : 'ext');
-
-  // Carpetas anidadas: set (Núcleo OSR / Extendido) > escuela > rama.
-  const setFolder = {}; const schoolFolder = {}; const branchFolder = {};
-  for (const set of ['core', 'ext']) {
-    setFolder[set] = makeId(`spellfolder:${set}`);
-    docs.push(makeFolder({ seed: `spellfolder:${set}`, name: SET_LABEL[set], type: 'Item', sort: set === 'core' ? 100000 : 200000 }));
-  }
-  [...new Set(src.map((s) => `${setOf(s)}::${s.school}`))].sort().forEach((key, i) => {
-    const [set, sc] = key.split('::');
-    schoolFolder[key] = makeId(`spellfolder:${set}:${sc}`);
-    docs.push(makeFolder({ seed: `spellfolder:${set}:${sc}`, name: SCHOOL_LABEL[sc] ?? sc, type: 'Item', parent: setFolder[set], sort: (i + 1) * 10000 }));
-  });
-  [...new Set(src.map((s) => `${setOf(s)}::${s.school}::${s.branch}`))].sort().forEach((key, i) => {
-    const [set, sc, br] = key.split('::');
-    branchFolder[key] = makeId(`spellfolder:${set}:${sc}:${br}`);
-    docs.push(makeFolder({ seed: `spellfolder:${set}:${sc}:${br}`, name: br || '(sin rama)', type: 'Item', parent: schoolFolder[`${set}::${sc}`], sort: (i + 1) * 100 }));
-  });
-
-  for (const s of src) {
-    const core = isCore(s.name);
-    const set = core ? 'core' : 'ext';
-    // NO se incluye ninguna metadata de Pathfinder.
-    const parts = [];
-    if (s.summary) parts.push(`<p>${esc(osrify(s.summary))}</p>`);
-    const meta = [];
-    if (s.branch) meta.push(`<strong>Rama:</strong> ${esc(s.branch)}`);
-    if (s.tags?.length) meta.push(`<strong>Tags:</strong> ${esc(s.tags.join(', '))}`);
-    if (meta.length) parts.push(`<p>${meta.join(' · ')}</p>`);
-    if (!core) parts.push('<p><em>Extendido: adaptar el balance a OSR antes de usar.</em></p>');
-
-    docs.push(makeItem({
-      seed: `spell:${s.school}:${s.branch}:${s.name}`,
-      name: s.name,
-      type: 'spell',
-      folder: branchFolder[`${set}::${s.school}::${s.branch}`],
-      system: {
-        description: parts.join('\n'),
-        school: s.school,
-        branch: s.branch,
-        tags: (s.tags ?? []).join(', '),
-        core,
-        level: s.level,
-        cost: '', castingTime: '', range: '', duration: ''
-      }
-    }));
-  }
-  return docs;
-}
 
 function docStats() {
   return { systemId: 'aristilia', systemVersion: SYSTEM_VERSION, coreVersion: '14', createdTime: 0, modifiedTime: 0, lastModifiedBy: null };
@@ -661,7 +582,6 @@ console.log('  ✓ lang/en.json sincronizado desde es-ES.json');
 
 const gear = buildGear();
 const profs = buildProficiencies();
-const spells = buildSpells();
 const races = buildRaces();
 const classes = buildClasses();
 const monsters = buildMonsters();
@@ -670,12 +590,11 @@ const characters = buildCharacters();
 
 await writePack('gear', gear);
 await writePack('proficiencies', profs);
-await writePack('spells', spells);
 await writePack('races', races);
 await writePack('classes', classes);
 await writePack('monsters', monsters);
 await writePack('treasure', treasure);
 await writePack('characters', characters);
 
-const total = gear.length + profs.length + spells.length + races.length + classes.length + monsters.length + treasure.length + characters.length;
-console.log(`\nTotal: ${total} documentos compilados en 8 compendios.`);
+const total = gear.length + profs.length + races.length + classes.length + monsters.length + treasure.length + characters.length;
+console.log(`\nTotal: ${total} documentos compilados en 7 compendios.`);

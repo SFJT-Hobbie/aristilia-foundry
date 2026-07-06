@@ -259,10 +259,7 @@ export class SpellData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
       description: new fields.HTMLField({ initial: '' }),
-      school: new fields.StringField({ initial: 'astral' }), // astral | natural | voiceForm
-      branch: new fields.StringField({ initial: '' }),        // Gris/Blanca/Negra, Agua/Aire/…
-      tags: new fields.StringField({ initial: '' }),          // separadas por coma
-      core: new fields.BooleanField({ initial: false }),      // true = clásico OSR (ya balanceado)
+      school: new fields.StringField({ initial: 'astral' }),
       level: new fields.NumberField({ integer: true, initial: 1, min: 0 }),
       cost: new fields.StringField({ initial: '' }), // maná / ranuras / puntos
       castingTime: new fields.StringField({ initial: '' }),
