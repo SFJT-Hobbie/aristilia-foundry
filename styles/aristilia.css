@@ -154,6 +154,20 @@
 .aristilia-sheet label.derived { justify-content: center; }
 .aristilia-sheet label.derived b { color: var(--ar-oxblood); font-size: 1.3em; }
 
+/* Mini-enlace 📖 al Manual junto a Raza/Clase (esquina superior derecha del label). */
+.aristilia-sheet .header-row label:has(> .rule-link) { position: relative; }
+.aristilia-sheet .rule-link {
+  position: absolute;
+  top: -1px;
+  right: 0;
+  color: var(--ar-oxblood);
+  opacity: 0.65;
+  cursor: pointer;
+  line-height: 1;
+  text-decoration: none;
+}
+.aristilia-sheet .rule-link:hover { opacity: 1; text-shadow: 0 0 6px rgba(120, 30, 20, 0.5); }
+
 /* ---------- Pestañas ---------- */
 .aristilia-sheet .sheet-tabs {
   display: flex;

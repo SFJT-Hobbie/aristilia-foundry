@@ -6,6 +6,7 @@
       <input type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'ARISTILIA.Name'}}" class="charname" />
       <div class="header-row">
         <label>{{localize 'ARISTILIA.Details.race'}}
+          {{#if system.details.race}}<a class="rule-link" data-action="openRule" data-kind="race" data-key="{{system.details.race}}" data-tooltip="{{localize 'ARISTILIA.Manual.viewRace'}}"><i class="fa-solid fa-book-open"></i></a>{{/if}}
           <select name="system.details.race">
             {{#each config.races as |label key|}}
               <option value="{{key}}" {{#if (eq key ../system.details.race)}}selected{{/if}}>{{localize label}}</option>
@@ -13,6 +14,7 @@
           </select>
         </label>
         <label>{{localize 'ARISTILIA.Details.class'}}
+          {{#if system.details.class}}<a class="rule-link" data-action="openRule" data-kind="class" data-key="{{system.details.class}}" data-tooltip="{{localize 'ARISTILIA.Manual.viewClass'}}"><i class="fa-solid fa-book-open"></i></a>{{/if}}
           <select name="system.details.class">
             {{#each config.classes as |label key|}}
               <option value="{{key}}" {{#if (eq key ../system.details.class)}}selected{{/if}}>{{localize label}}</option>

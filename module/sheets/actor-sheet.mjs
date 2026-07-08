@@ -36,7 +36,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       unplaceItem: BaseActorSheet.#onUnplaceItem,
       placeItem: BaseActorSheet.#onPlaceItem,
       viewContainer: BaseActorSheet.#onViewContainer,
-      pickItem: BaseActorSheet.#onPickItem
+      pickItem: BaseActorSheet.#onPickItem,
+      openRule: BaseActorSheet.#onOpenRule
     }
   };
 
@@ -626,6 +627,27 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       const [created] = await this.document.createEmbeddedDocuments('Item', [{ name, type }]);
       created?.sheet.render(true);
     }
+  }
+
+  /** Abre en el Manual (compendio) la página de la raza o clase del personaje. */
+  static async #onOpenRule(event, target) {
+    event.preventDefault();
+    const kind = target.dataset.kind;             // 'race' | 'class'
+    const key = target.dataset.key;               // p.ej. 'fighter', 'beastmen'
+    const pageName = ARISTILIA.manualPages?.[kind]?.[key];
+    const journalName = ARISTILIA.manualJournal?.[kind];
+    if (!pageName || !journalName) return;
+
+    const pack = game.packs.get(ARISTILIA.manualPack);
+    if (!pack) return ui.notifications.warn(game.i18n.localize('ARISTILIA.Manual.missing'));
+
+    const index = await pack.getIndex();
+    const entry = index.find((e) => e.name === journalName);
+    const journal = entry && await pack.getDocument(entry._id);
+    const page = journal?.pages.find((p) => p.name === pageName);
+    if (!page) return ui.notifications.warn(game.i18n.localize('ARISTILIA.Manual.missing'));
+
+    journal.sheet.render(true, { pageId: page.id });
   }
 
   static async #onEditItem(event, target) {

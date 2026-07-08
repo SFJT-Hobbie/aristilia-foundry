@@ -62,6 +62,17 @@ ARISTILIA.races = {
   verdant: 'ARISTILIA.Race.verdant'
 };
 
+/**
+ * Enlaces rápidos al compendio "Manual de Aristilia" desde la ficha:
+ * clave de raza/clase → título de la página del Manual.
+ */
+ARISTILIA.manualPack = 'aristilia.manual';
+ARISTILIA.manualJournal = { race: 'Razas', class: 'Clases' };
+ARISTILIA.manualPages = {
+  race: { beastmen: 'Bestia', dwarf: 'Enano', elf: 'Elfo', halfling: 'Mediano', human: 'Humano', verdant: 'Verdant' },
+  class: { fighter: 'Guerrero', magicUser: 'Usuario de Magia', specialist: 'Especialista', multiclass: 'Multiclase' }
+};
+
 /** Alineamientos. */
 ARISTILIA.alignments = {
   lawful: 'ARISTILIA.Alignment.lawful',
