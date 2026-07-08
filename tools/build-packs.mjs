@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.30.0';
+const SYSTEM_VERSION = '0.31.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -627,13 +627,15 @@ async function writePack(name, docs) {
     const primaryType = _key.slice(1, _key.indexOf('!', 1)); // '!journal!x' → 'journal'
     const parentId = value._id;
     // Extraer cada colección embebida a claves de sublevel: !type.field!parentId.childId
+    // El documento padre conserva el campo como ARRAY DE _id (referencias), igual que
+    // hace el foundryvtt-cli oficial (mapHierarchy → d._id). Con [] Foundry no las ve.
     for (const field of EMBEDDED_FIELDS) {
       if (!Array.isArray(value[field]) || !value[field].length) continue;
       for (const child of value[field]) {
         batch.put(`!${primaryType}.${field}!${parentId}.${child._id}`, child);
         embedded++;
       }
-      value[field] = []; // Foundry reconstruye la colección desde los sublevels
+      value[field] = value[field].map((child) => child._id);
     }
     batch.put(_key, value);
   }
