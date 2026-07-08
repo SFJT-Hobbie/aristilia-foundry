@@ -199,7 +199,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (!results) return;
     if (q.length < 2) { results.hidden = true; results.replaceChildren(); return; }
 
-    const matches = await this.#searchCompendia(q);
+    const matches = (await this.#searchCompendia(q)).filter((e) => ['weapon', 'armor', 'shield', 'gear'].includes(e.type));
     if ((event.target.value ?? '').trim().toLowerCase() !== q) return; // cambió mientras buscaba
     if (!matches.length) { results.hidden = true; results.replaceChildren(); return; }
 
@@ -225,10 +225,11 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         let idx;
         try { idx = await pack.getIndex(); } catch { continue; }
         for (const e of idx) {
-          if (!['weapon', 'armor', 'shield', 'gear'].includes(e.type)) continue;
+          if (!['weapon', 'armor', 'shield', 'gear', 'proficiency'].includes(e.type)) continue;
           this.#packCache.push({
             uuid: e.uuid ?? `Compendium.${pack.collection}.Item.${e._id}`,
             name: e.name, img: e.img ?? 'icons/svg/item-bag.svg', type: e.type,
+            category: foundry.utils.getProperty(e, 'system.category') ?? '',
             damage: foundry.utils.getProperty(e, 'system.damage') ?? '',
             ac: foundry.utils.getProperty(e, 'system.ac')
           });
@@ -595,18 +596,34 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     created?.sheet.render(true);
   }
 
-  /** Selector de arma/armadura/escudo del compendio (buscar+añadir) o crear personalizado. */
+  /**
+   * Selector unificado (buscar+añadir del compendio, o crear personalizado) para
+   * arma/armadura/escudo/equipo/competencia. Para equipo y competencia muestra un
+   * primer desplegable de categoría.
+   */
   static async #onPickItem(event, target) {
-    const type = target.dataset.type; // weapon | armor | shield
+    const type = target.dataset.type; // weapon | armor | shield | gear | proficiency
     const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
     await this.#searchCompendia(''); // asegura el índice cargado
-    const cache = (this.#packCache ?? []).filter((e) => e.type === type);
-    const detail = (e) => type === 'weapon'
-      ? (e.damage ? foundry.utils.escapeHTML(String(e.damage)) : '')
-      : (Number.isFinite(e.ac) ? `CA ${e.ac}` : '');
+    const cache = (this.#packCache ?? []).filter((e) => e.type === type)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const hasCats = (type === 'gear' || type === 'proficiency');
+    const catLabel = (c) => (type === 'gear' ? game.i18n.localize(ARISTILIA.gearCategories?.[c] ?? c) : c);
+    const cats = hasCats ? [...new Set(cache.map((e) => e.category).filter(Boolean))].sort() : [];
+    const catSelect = (hasCats && cats.length)
+      ? `<select class="sp-cat"><option value="">${game.i18n.localize('ARISTILIA.Pick.allCategories')}</option>` +
+        cats.map((c) => `<option value="${foundry.utils.escapeHTML(c)}">${foundry.utils.escapeHTML(catLabel(c))}</option>`).join('') + '</select>'
+      : '';
+
+    const detail = (e) => {
+      if (type === 'weapon') return e.damage ? foundry.utils.escapeHTML(String(e.damage)) : '';
+      if (type === 'armor' || type === 'shield') return Number.isFinite(e.ac) ? `CA ${e.ac}` : '';
+      return foundry.utils.escapeHTML(catLabel(e.category) || '');
+    };
 
     const content = `<div class="aristilia-create-dialog spell-picker">
-      <div class="sp-filters"><input type="search" class="sp-search" placeholder="${game.i18n.localize('ARISTILIA.Pick.search')}" autofocus /></div>
+      <div class="sp-filters">${catSelect}<input type="search" class="sp-search" placeholder="${game.i18n.localize('ARISTILIA.Pick.search')}" autofocus /></div>
       <div class="sp-results"></div>
     </div>`;
 
@@ -622,12 +639,16 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       render: (ev, dialog) => {
         const el = dialog.element;
         const search = el.querySelector('.sp-search');
+        const catSel = el.querySelector('.sp-cat');
         const results = el.querySelector('.sp-results');
         const apply = () => {
           const q = search.value.trim().toLowerCase();
-          const list = q ? cache.filter((e) => e.name.toLowerCase().includes(q)) : cache;
+          const cat = catSel?.value ?? '';
+          let list = cache;
+          if (cat) list = list.filter((e) => e.category === cat);
+          if (q) list = list.filter((e) => e.name.toLowerCase().includes(q));
           results.innerHTML = list.length
-            ? list.slice(0, 60).map((e) =>
+            ? list.slice(0, 80).map((e) =>
               `<div class="sp-row" data-uuid="${e.uuid}"><span class="sp-name">${foundry.utils.escapeHTML(e.name)}</span>` +
               `<span class="sp-meta">${detail(e)}</span>` +
               `<a class="sp-add" title="${game.i18n.localize('ARISTILIA.Add')}"><i class="fas fa-plus"></i></a></div>`).join('')
@@ -641,6 +662,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           });
         };
         search.addEventListener('input', apply);
+        catSel?.addEventListener('change', apply);
         apply();
       }
     });
