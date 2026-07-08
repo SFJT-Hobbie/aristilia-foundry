@@ -100,7 +100,7 @@
 
     <section class="weapons-block">
       <h3>{{localize 'ARISTILIA.Weapons'}}
-        <a class="item-create" data-action="createItem" data-type="weapon" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
+        <a class="item-create" data-action="pickItem" data-type="weapon" title="{{localize 'ARISTILIA.Add'}}"><i class="fas fa-plus"></i></a>
       </h3>
       <ol class="items-list">
         {{#each items.weapons as |item|}}
@@ -123,8 +123,8 @@
     <section class="armor-block">
       <h3>{{localize 'ARISTILIA.Armor'}}
         <span class="add-group">
-          <a class="item-create" data-action="createItem" data-type="armor" title="{{localize 'ARISTILIA.AddArmor'}}"><i class="fas fa-plus"></i> {{localize 'TYPES.Item.armor'}}</a>
-          <a class="item-create" data-action="createItem" data-type="shield" title="{{localize 'ARISTILIA.AddShield'}}"><i class="fas fa-plus"></i> {{localize 'TYPES.Item.shield'}}</a>
+          <a class="item-create" data-action="pickItem" data-type="armor" title="{{localize 'ARISTILIA.AddArmor'}}"><i class="fas fa-plus"></i> {{localize 'TYPES.Item.armor'}}</a>
+          <a class="item-create" data-action="pickItem" data-type="shield" title="{{localize 'ARISTILIA.AddShield'}}"><i class="fas fa-plus"></i> {{localize 'TYPES.Item.shield'}}</a>
         </span>
       </h3>
       <ol class="items-list">

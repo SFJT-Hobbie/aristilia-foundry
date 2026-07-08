@@ -43,6 +43,9 @@ Hooks.once('init', function () {
   CONFIG.Actor.dataModels.character = models.CharacterData;
   CONFIG.Actor.dataModels.npc = models.NpcData;
 
+  // Campos extra en el índice de compendios de Item (para el selector armas/armaduras)
+  CONFIG.Item.compendiumIndexFields = ['system.damage', 'system.ac'];
+
   // DataModels de Item
   CONFIG.Item.dataModels.weapon = models.WeaponData;
   CONFIG.Item.dataModels.armor = models.ArmorData;

@@ -35,7 +35,8 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       switchTab: BaseActorSheet.#onSwitchTab,
       unplaceItem: BaseActorSheet.#onUnplaceItem,
       placeItem: BaseActorSheet.#onPlaceItem,
-      viewContainer: BaseActorSheet.#onViewContainer
+      viewContainer: BaseActorSheet.#onViewContainer,
+      pickItem: BaseActorSheet.#onPickItem
     }
   };
 
@@ -227,7 +228,9 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           if (!['weapon', 'armor', 'shield', 'gear'].includes(e.type)) continue;
           this.#packCache.push({
             uuid: e.uuid ?? `Compendium.${pack.collection}.Item.${e._id}`,
-            name: e.name, img: e.img ?? 'icons/svg/item-bag.svg'
+            name: e.name, img: e.img ?? 'icons/svg/item-bag.svg', type: e.type,
+            damage: foundry.utils.getProperty(e, 'system.damage') ?? '',
+            ac: foundry.utils.getProperty(e, 'system.ac')
           });
         }
       }
@@ -590,6 +593,63 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     // donde se ajustan nombre, tamaño (ancho×alto) y demás.
     const [created] = await this.document.createEmbeddedDocuments('Item', [{ name, type }]);
     created?.sheet.render(true);
+  }
+
+  /** Selector de arma/armadura/escudo del compendio (buscar+añadir) o crear personalizado. */
+  static async #onPickItem(event, target) {
+    const type = target.dataset.type; // weapon | armor | shield
+    const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
+    await this.#searchCompendia(''); // asegura el índice cargado
+    const cache = (this.#packCache ?? []).filter((e) => e.type === type);
+    const detail = (e) => type === 'weapon'
+      ? (e.damage ? foundry.utils.escapeHTML(String(e.damage)) : '')
+      : (Number.isFinite(e.ac) ? `CA ${e.ac}` : '');
+
+    const content = `<div class="aristilia-create-dialog spell-picker">
+      <div class="sp-filters"><input type="search" class="sp-search" placeholder="${game.i18n.localize('ARISTILIA.Pick.search')}" autofocus /></div>
+      <div class="sp-results"></div>
+    </div>`;
+
+    const action = await foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n.format('ARISTILIA.Pick.title', { type: typeLabel }), icon: 'fas fa-plus' },
+      classes: ['aristilia', 'dialog'],
+      content,
+      rejectClose: false,
+      buttons: [
+        { action: 'custom', label: game.i18n.localize('ARISTILIA.Pick.custom') },
+        { action: 'close', label: game.i18n.localize('ARISTILIA.Icon.close'), default: true }
+      ],
+      render: (ev, dialog) => {
+        const el = dialog.element;
+        const search = el.querySelector('.sp-search');
+        const results = el.querySelector('.sp-results');
+        const apply = () => {
+          const q = search.value.trim().toLowerCase();
+          const list = q ? cache.filter((e) => e.name.toLowerCase().includes(q)) : cache;
+          results.innerHTML = list.length
+            ? list.slice(0, 60).map((e) =>
+              `<div class="sp-row" data-uuid="${e.uuid}"><span class="sp-name">${foundry.utils.escapeHTML(e.name)}</span>` +
+              `<span class="sp-meta">${detail(e)}</span>` +
+              `<a class="sp-add" title="${game.i18n.localize('ARISTILIA.Add')}"><i class="fas fa-plus"></i></a></div>`).join('')
+            : `<p class="hint">${game.i18n.localize('ARISTILIA.Pick.noResults')}</p>`;
+          results.querySelectorAll('.sp-add').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              const uuid = btn.closest('.sp-row')?.dataset.uuid;
+              const doc = uuid && await fromUuid(uuid);
+              if (doc) { await this.document.createEmbeddedDocuments('Item', [doc.toObject()]); ui.notifications.info(`${doc.name} ✓`); }
+            });
+          });
+        };
+        search.addEventListener('input', apply);
+        apply();
+      }
+    });
+
+    if (action === 'custom') {
+      const name = game.i18n.format('ARISTILIA.NewItem', { type: typeLabel });
+      const [created] = await this.document.createEmbeddedDocuments('Item', [{ name, type }]);
+      created?.sheet.render(true);
+    }
   }
 
   static async #onEditItem(event, target) {

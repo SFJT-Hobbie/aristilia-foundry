@@ -12,6 +12,10 @@
 
   "ARISTILIA.Name": "Nombre",
   "ARISTILIA.Add": "Añadir",
+  "ARISTILIA.Pick.title": "Añadir {type}",
+  "ARISTILIA.Pick.custom": "Crear personalizado",
+  "ARISTILIA.Pick.search": "Buscar en el compendio…",
+  "ARISTILIA.Pick.noResults": "Sin resultados. Usá «Crear personalizado».",
   "ARISTILIA.NoneYet": "Aún no hay nada aquí.",
   "ARISTILIA.Tab.main": "Ficha",
   "ARISTILIA.Tab.inventory": "Inventario",
