@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.26.0';
+const SYSTEM_VERSION = '0.30.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -609,18 +609,37 @@ function buildTreasure() {
 /*  Escritura LevelDB                            */
 /* -------------------------------------------- */
 
+// Colecciones embebidas que Foundry guarda como "sublevels" (claves separadas)
+// en los packs LevelDB, NO inline dentro del documento padre.
+//   journal → pages   (JournalEntryPage)
+//   actors  → items   (Item)  ·  effects (ActiveEffect)
+//   items   → effects (ActiveEffect)
+const EMBEDDED_FIELDS = ['pages', 'items', 'effects'];
+
 async function writePack(name, docs) {
   const dbPath = join(root, 'packs', name);
   const db = new ClassicLevel(dbPath, { valueEncoding: 'json' });
   await db.clear(); // reconstrucción limpia
   const batch = db.batch();
+  let embedded = 0;
   for (const doc of docs) {
     const { _key, ...value } = doc;
+    const primaryType = _key.slice(1, _key.indexOf('!', 1)); // '!journal!x' → 'journal'
+    const parentId = value._id;
+    // Extraer cada colección embebida a claves de sublevel: !type.field!parentId.childId
+    for (const field of EMBEDDED_FIELDS) {
+      if (!Array.isArray(value[field]) || !value[field].length) continue;
+      for (const child of value[field]) {
+        batch.put(`!${primaryType}.${field}!${parentId}.${child._id}`, child);
+        embedded++;
+      }
+      value[field] = []; // Foundry reconstruye la colección desde los sublevels
+    }
     batch.put(_key, value);
   }
   await batch.write();
   await db.close();
-  console.log(`  ✓ pack "${name}": ${docs.length} documentos`);
+  console.log(`  ✓ pack "${name}": ${docs.length} documentos${embedded ? ` (+${embedded} embebidos)` : ''}`);
 }
 
 // Sincroniza en.json = es-ES.json (mismas etiquetas en español para clientes en inglés).
