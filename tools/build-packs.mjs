@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.23.1';
+const SYSTEM_VERSION = '0.25.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -129,6 +129,34 @@ function makeMacro({ seed, name, img, command }) {
       modifiedTime: 0,
       lastModifiedBy: null
     }
+  };
+}
+
+function makeJournal({ seed, name, sort = 0, folder = null, pages = [] }) {
+  const _id = makeId(seed);
+  return {
+    _id,
+    _key: `!journal!${_id}`,
+    name,
+    pages: pages.map((pg, i) => {
+      const pid = makeId(`${seed}:page:${i}:${pg.title}`);
+      return {
+        _id: pid,
+        name: pg.title,
+        type: 'text',
+        title: { show: true, level: 1 },
+        text: { format: 1, content: pg.html ?? '' },
+        sort: pg.sort ?? (i + 1) * 1000,
+        ownership: { default: -1 }, // hereda del Journal
+        flags: {},
+        _stats: docStats()
+      };
+    }),
+    folder,
+    sort,
+    ownership: { default: 0 },
+    flags: {},
+    _stats: docStats()
   };
 }
 
@@ -546,6 +574,17 @@ function buildCharacters() {
   return docs;
 }
 
+/** Manual de reglas: un Journal por sección, portado de tools/manual-source.json. */
+function buildManual() {
+  const books = JSON.parse(readFileSync(join(root, 'tools', 'manual-source.json'), 'utf8'));
+  return books.map((bk) => makeJournal({
+    seed: `manual:${bk.key}`,
+    name: bk.name,
+    sort: bk.sort,
+    pages: bk.pages
+  }));
+}
+
 function buildTreasure() {
   // Los datos B/X se inyectan como prefijo en el command de cada macro, así son
   // autocontenidas (solo dependen de APIs estables de Foundry: Roll/ChatMessage/DialogV2).
@@ -587,6 +626,7 @@ const classes = buildClasses();
 const monsters = buildMonsters();
 const treasure = buildTreasure();
 const characters = buildCharacters();
+const manual = buildManual();
 
 await writePack('gear', gear);
 await writePack('proficiencies', profs);
@@ -595,6 +635,7 @@ await writePack('classes', classes);
 await writePack('monsters', monsters);
 await writePack('treasure', treasure);
 await writePack('characters', characters);
+await writePack('manual', manual);
 
-const total = gear.length + profs.length + races.length + classes.length + monsters.length + treasure.length + characters.length;
-console.log(`\nTotal: ${total} documentos compilados en 7 compendios.`);
+const total = gear.length + profs.length + races.length + classes.length + monsters.length + treasure.length + characters.length + manual.length;
+console.log(`\nTotal: ${total} documentos compilados en 8 compendios.`);

@@ -4,6 +4,8 @@ aristilia.zip
 tools/repo-gear/
 tools/repo-spells/
 tools/xlsx-tmp/
+# Copias JSX crudas de las reglas del repo (la fuente portada vive en tools/manual-source.json)
+tools/rules-src/
 # NOTA: no ignorar *.log de forma global — LevelDB guarda datos en archivos NNNNNN.log
 # Archivos de bloqueo y logs de depuración de LevelDB (se regeneran solos)
 packs/**/LOCK
