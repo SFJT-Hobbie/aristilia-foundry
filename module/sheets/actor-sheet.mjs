@@ -635,30 +635,38 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const kind = target.dataset.kind;             // 'race' | 'class'
     const key = target.dataset.key;               // p.ej. 'fighter', 'beastmen'
     const pageName = ARISTILIA.manualPages?.[kind]?.[key];
-    const journalName = ARISTILIA.manualJournal?.[kind];
-    if (!pageName || !journalName) {
+    const journalName = ARISTILIA.manualJournal?.[kind]; // pista para el camino rápido
+    if (!pageName) {
       console.warn('Aristilia | openRule: sin mapeo para', { kind, key });
       return;
     }
 
-    // 1) Copia importada en el mundo (preferida: puede estar editada por el GM).
-    let journal = game.journal?.getName(journalName);
+    const findPage = (j) => j?.pages?.find((p) => p.name === pageName);
+    let journal = null;
+    let page = null;
 
-    // 2) Si no está importada, buscar en el compendio del sistema.
-    if (!journal) {
+    // 1) Camino rápido: diario del mundo con ese nombre.
+    journal = game.journal?.getName?.(journalName) ?? null;
+    page = findPage(journal);
+
+    // 2) Cualquier diario del mundo que contenga la página (por si se renombró/movió el journal).
+    if (!page) {
+      for (const j of (game.journal ?? [])) { const p = findPage(j); if (p) { journal = j; page = p; break; } }
+    }
+
+    // 3) Compendio del sistema (si el Manual no fue importado).
+    if (!page) {
       const pack = game.packs.get(ARISTILIA.manualPack);
       if (pack) {
-        const index = await pack.getIndex();
-        const entry = index.find((e) => e.name === journalName);
-        if (entry) journal = await pack.getDocument(entry._id);
+        const docs = await pack.getDocuments();
+        for (const j of docs) { const p = findPage(j); if (p) { journal = j; page = p; break; } }
       }
     }
 
-    const page = journal?.pages?.find((p) => p.name === pageName);
     if (!page) {
       console.warn('Aristilia | openRule: no se encontró la página', {
-        journalName, pageName, journalEncontrado: journal?.name ?? null,
-        paginasDisponibles: journal?.pages?.map((p) => p.name) ?? null
+        kind, key, pageName, journalName,
+        diariosMundo: (game.journal ?? []).map((j) => j.name)
       });
       return ui.notifications.warn(game.i18n.localize('ARISTILIA.Manual.missing'));
     }
