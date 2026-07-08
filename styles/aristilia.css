@@ -470,33 +470,12 @@
 .aristilia-sheet .inv-draggable { cursor: grab; }
 .aristilia-sheet .backpack-title { margin-top: 8px; }
 
-/* Barra de herramientas + buscador del inventario */
-.aristilia-sheet .inv-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-.aristilia-sheet .inv-toolbar .backpack-title { margin: 0; flex: 0 0 auto; }
-.aristilia-sheet .inv-search { flex: 1; min-width: 150px; }
 /* Lista de objetos a doble columna responsive */
 .aristilia-sheet .items-list.inventory-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 4px 12px;
 }
-/* Resultados de búsqueda en compendios */
-.aristilia-sheet .inv-search-results {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 4px 10px;
-  margin: 6px 0;
-  padding: 6px;
-  border: 1px dashed var(--ar-border);
-  border-radius: 6px;
-  background: var(--ar-panel);
-}
-.aristilia-sheet .inv-search-results .cmp-row { display: flex; align-items: center; gap: 8px; padding: 3px 5px; border-radius: 4px; }
-.aristilia-sheet .inv-search-results .cmp-row:hover { background: var(--ar-panel-2); }
-.aristilia-sheet .inv-search-results .cmp-row img { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; }
-.aristilia-sheet .inv-search-results .cmp-row span { flex: 1; font-size: 0.82em; }
-.aristilia-sheet .inv-search-results .cmp-add { cursor: pointer; color: var(--ar-oxblood); }
-.aristilia-sheet .inv-search-results .cmp-add:hover { color: var(--ar-gold-bright); text-shadow: 0 0 6px rgba(156, 123, 58, 0.7); }
 
 /* Mochila-contenedor: rejilla anexa */
 .aristilia-sheet .container-block { margin: 12px 0 4px; }

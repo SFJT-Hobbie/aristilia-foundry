@@ -46,10 +46,7 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** ¿Preguntar por un modificador situacional en la próxima tirada? */
   _situational = false;
 
-  /** Texto de búsqueda del inventario (persistido entre renders). */
-  _invSearch = '';
-
-  /** Índice cacheado de objetos de compendio (weapon/armor/shield/gear). */
+  /** Índice cacheado de objetos de compendio (weapon/armor/shield/gear/proficiency). */
   #packCache = null;
 
   /** @override */
@@ -171,52 +168,9 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     root.addEventListener('dragover', this.#onDragOver.bind(this), { signal });
     root.addEventListener('drop', this.#onDrop.bind(this), { signal });
     root.addEventListener('dragend', () => this.#stopAutoScroll(), { signal });
-
-    // Buscador del inventario (filtra la lista local + ofrece objetos del compendio)
-    const search = root.querySelector('.inv-search');
-    if (search) {
-      search.value = this._invSearch ?? '';
-      search.addEventListener('input', this.#onInvSearch.bind(this), { signal });
-      if (this._invSearch) this.#applyInvFilter(this._invSearch.trim().toLowerCase());
-    }
   }
 
-  /* ---------- Búsqueda de inventario ---------- */
-
-  #applyInvFilter(q) {
-    this.element?.querySelectorAll('.inventory-list > li').forEach((li) => {
-      const name = li.querySelector('.item-name')?.textContent?.toLowerCase() ?? '';
-      li.style.display = (!q || name.includes(q)) ? '' : 'none';
-    });
-  }
-
-  async #onInvSearch(event) {
-    const q = event.target.value.trim().toLowerCase();
-    this._invSearch = event.target.value;
-    this.#applyInvFilter(q);
-
-    const results = this.element?.querySelector('.inv-search-results');
-    if (!results) return;
-    if (q.length < 2) { results.hidden = true; results.replaceChildren(); return; }
-
-    const matches = (await this.#searchCompendia(q)).filter((e) => ['weapon', 'armor', 'shield', 'gear'].includes(e.type));
-    if ((event.target.value ?? '').trim().toLowerCase() !== q) return; // cambió mientras buscaba
-    if (!matches.length) { results.hidden = true; results.replaceChildren(); return; }
-
-    results.hidden = false;
-    results.innerHTML = matches.slice(0, 15).map((m) =>
-      `<div class="cmp-row" data-uuid="${m.uuid}"><img src="${m.img}" alt="" /><span>${foundry.utils.escapeHTML(m.name)}</span>` +
-      `<a class="cmp-add" title="${game.i18n.localize('ARISTILIA.Add')}"><i class="fas fa-plus"></i></a></div>`).join('');
-    results.querySelectorAll('.cmp-add').forEach((el) => {
-      el.addEventListener('click', async () => {
-        const uuid = el.closest('.cmp-row')?.dataset.uuid;
-        const doc = uuid && await fromUuid(uuid);
-        if (doc) { this._invSearch = ''; await this.document.createEmbeddedDocuments('Item', [doc.toObject()]); }
-      });
-    });
-  }
-
-  /** Índice (cacheado) de objetos de inventario en compendios Item del sistema. */
+  /** Índice (cacheado) de objetos de compendio (weapon/armor/shield/gear/proficiency). */
   async #searchCompendia(q) {
     if (!this.#packCache) {
       this.#packCache = [];
