@@ -629,23 +629,39 @@ class BaseActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     }
   }
 
-  /** Abre en el Manual (compendio) la página de la raza o clase del personaje. */
+  /** Abre en el Manual la página de la raza o clase del personaje (mundo importado o compendio). */
   static async #onOpenRule(event, target) {
     event.preventDefault();
     const kind = target.dataset.kind;             // 'race' | 'class'
     const key = target.dataset.key;               // p.ej. 'fighter', 'beastmen'
     const pageName = ARISTILIA.manualPages?.[kind]?.[key];
     const journalName = ARISTILIA.manualJournal?.[kind];
-    if (!pageName || !journalName) return;
+    if (!pageName || !journalName) {
+      console.warn('Aristilia | openRule: sin mapeo para', { kind, key });
+      return;
+    }
 
-    const pack = game.packs.get(ARISTILIA.manualPack);
-    if (!pack) return ui.notifications.warn(game.i18n.localize('ARISTILIA.Manual.missing'));
+    // 1) Copia importada en el mundo (preferida: puede estar editada por el GM).
+    let journal = game.journal?.getName(journalName);
 
-    const index = await pack.getIndex();
-    const entry = index.find((e) => e.name === journalName);
-    const journal = entry && await pack.getDocument(entry._id);
-    const page = journal?.pages.find((p) => p.name === pageName);
-    if (!page) return ui.notifications.warn(game.i18n.localize('ARISTILIA.Manual.missing'));
+    // 2) Si no está importada, buscar en el compendio del sistema.
+    if (!journal) {
+      const pack = game.packs.get(ARISTILIA.manualPack);
+      if (pack) {
+        const index = await pack.getIndex();
+        const entry = index.find((e) => e.name === journalName);
+        if (entry) journal = await pack.getDocument(entry._id);
+      }
+    }
+
+    const page = journal?.pages?.find((p) => p.name === pageName);
+    if (!page) {
+      console.warn('Aristilia | openRule: no se encontró la página', {
+        journalName, pageName, journalEncontrado: journal?.name ?? null,
+        paginasDisponibles: journal?.pages?.map((p) => p.name) ?? null
+      });
+      return ui.notifications.warn(game.i18n.localize('ARISTILIA.Manual.missing'));
+    }
 
     journal.sheet.render(true, { pageId: page.id });
   }
