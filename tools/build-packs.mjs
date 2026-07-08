@@ -17,7 +17,7 @@ import { flattenProficiencies } from '../module/data/proficiencies.mjs';
 import { TREASURE } from './treasure-data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SYSTEM_VERSION = '0.25.0';
+const SYSTEM_VERSION = '0.26.0';
 
 /** _id estable de 16 caracteres [A-Za-z0-9] derivado de una semilla. */
 function makeId(seed) {
@@ -410,7 +410,13 @@ function buildProficiencies() {
   }));
 }
 
-function buildRaces() {
+/** Párrafo con enlace enriquecido a la página del Manual (o '' si no hay destino). */
+function manualLinkP(uuid, pageName) {
+  if (!uuid) return '';
+  return `<p><i class="fa-solid fa-book-open"></i> <strong>Regla:</strong> @UUID[${uuid}]{Manual › ${pageName}}</p>`;
+}
+
+function buildRaces(linkTo = () => null) {
   return RACES.map((r) => makeItem({
     seed: `race:${r.key}`,
     name: r.name,
@@ -420,7 +426,8 @@ function buildRaces() {
         `<p><strong>Modificadores de atributo:</strong> ${r.abilityMods}</p>` +
         `<p><strong>Bono de HP:</strong> ${r.hpBonus} · <strong>Bono de salvación:</strong> +${r.saveBonus} vs. ${r.saveVs}</p>` +
         `<p><strong>Idiomas:</strong> ${r.languages} · <strong>Competencias:</strong> ${r.profSlots}</p>` +
-        `<p>${r.special}</p>`,
+        `<p>${r.special}</p>` +
+        manualLinkP(linkTo(r.key)?.uuid, linkTo(r.key)?.page),
       key: r.key,
       abilityMods: r.abilityMods,
       hpBonus: r.hpBonus,
@@ -432,7 +439,7 @@ function buildRaces() {
   }));
 }
 
-function buildClasses() {
+function buildClasses(linkTo = () => null) {
   return CLASSES.map((c) => makeItem({
     seed: `class:${c.key}`,
     name: c.name,
@@ -441,7 +448,8 @@ function buildClasses() {
       description:
         `<p><strong>Dado de golpe:</strong> ${c.hitDie} · <strong>Comp. armas:</strong> ${c.weaponSlots} · <strong>Comp. no-armas:</strong> ${c.nonWeaponSlots}</p>` +
         `<p><strong>Salvada base:</strong> +${c.baseSave} vs. ${c.saveVs} · <strong>Bono al golpear:</strong> ${c.hitBonus}</p>` +
-        `<p>${c.special}</p>`,
+        `<p>${c.special}</p>` +
+        manualLinkP(linkTo(c.key)?.uuid, linkTo(c.key)?.page),
       key: c.key,
       hitDie: c.hitDie,
       weaponSlots: c.weaponSlots,
@@ -619,14 +627,52 @@ async function writePack(name, docs) {
 copyFileSync(join(root, 'lang', 'es-ES.json'), join(root, 'lang', 'en.json'));
 console.log('  ✓ lang/en.json sincronizado desde es-ES.json');
 
+/* -------------------------------------------- */
+/*  Enlaces cruzados @UUID  (items ⇄ manual)     */
+/* -------------------------------------------- */
+
+// key de clase/raza → título de página en el Manual.
+const CLASS_PAGE = { fighter: 'Guerrero', magicUser: 'Usuario de Magia', specialist: 'Especialista', multiclass: 'Multiclase' };
+const RACE_PAGE = { human: 'Humano', elf: 'Elfo', dwarf: 'Enano', halfling: 'Mediano', beastmen: 'Bestia', verdant: 'Verdant' };
+
+/** Resuelve el UUID de una página del Manual por nombre de libro + título de página. */
+function pageLinker(manual, journalName, keyToPage) {
+  const j = manual.find((x) => x.name === journalName);
+  return (key) => {
+    const pageName = keyToPage[key];
+    const p = j?.pages.find((pg) => pg.name === pageName);
+    if (!j || !p) return null;
+    return { uuid: `Compendium.aristilia.manual.JournalEntry.${j._id}.JournalEntryPage.${p._id}`, page: pageName };
+  };
+}
+
+/** Añade al pie de las páginas de clase/raza del Manual un enlace al item del compendio. */
+function crossLinkManualToItems(manual) {
+  const append = (journalName, keyToPage, itemPack, seedPrefix, labelByKey) => {
+    const j = manual.find((x) => x.name === journalName);
+    if (!j) return;
+    for (const [key, pageName] of Object.entries(keyToPage)) {
+      const p = j.pages.find((pg) => pg.name === pageName);
+      if (!p) continue;
+      const uuid = `Compendium.aristilia.${itemPack}.Item.${makeId(`${seedPrefix}:${key}`)}`;
+      p.text.content += `\n<hr>\n<p><i class="fa-solid fa-id-badge"></i> <strong>Ficha del compendio:</strong> @UUID[${uuid}]{${labelByKey[key]}}</p>`;
+    }
+  };
+  append('Clases', CLASS_PAGE, 'classes', 'class', Object.fromEntries(CLASSES.map((c) => [c.key, c.name])));
+  append('Razas', RACE_PAGE, 'races', 'race', Object.fromEntries(RACES.map((r) => [r.key, r.name])));
+}
+
 const gear = buildGear();
 const profs = buildProficiencies();
-const races = buildRaces();
-const classes = buildClasses();
 const monsters = buildMonsters();
 const treasure = buildTreasure();
 const characters = buildCharacters();
 const manual = buildManual();
+
+// items → manual (enlace en la descripción) y manual → items (pie de página).
+const races = buildRaces(pageLinker(manual, 'Razas', RACE_PAGE));
+const classes = buildClasses(pageLinker(manual, 'Clases', CLASS_PAGE));
+crossLinkManualToItems(manual);
 
 await writePack('gear', gear);
 await writePack('proficiencies', profs);
